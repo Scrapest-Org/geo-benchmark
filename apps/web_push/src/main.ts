@@ -11,7 +11,7 @@ const gtm = new GuestTokenManager();
 const gql = new XGraphQL(gtm);
 
 const pool = new AccountPoolManager("conveyor4");
-const instanceId = getEnv("INSTANCE_ID");
+const vmName = getEnv("VM_NAME");
 const xRef = { current: null as X | null };
 
 async function runWithAccount(retries = 0): Promise<void> {
@@ -22,9 +22,9 @@ async function runWithAccount(retries = 0): Promise<void> {
 
   let acc: Account;
   try {
-    acc = await pool.getAccount({ claimKey: instanceId });
+    acc = await pool.getAccount({ claimKey: vmName });
     console.log(
-      `*| [${instanceId}] [Attempt ${retries + 1}] Setting up account: ${acc.login}`,
+      `*| [${vmName}] [Attempt ${retries + 1}] Setting up account: ${acc.login}`,
     );
   } catch (e) {
     console.error("Failed to pull account from pool:", e);
@@ -33,23 +33,23 @@ async function runWithAccount(retries = 0): Promise<void> {
   }
 
   try {
-    await setup(acc, instanceId);
-    await TXID.waitForHealthy({ context: `WEBPUSH_${instanceId}` });
+    await setup(acc, vmName);
+    await TXID.waitForHealthy({ context: `WEBPUSH_${vmName}` });
 
     xRef.current = x;
     await webpushQueue.add("update-session", {
       cookies: x!.cookies,
-      targetInstance: instanceId,
+      targetInstance: vmName,
     });
-    await webpushQueue.add("sync-following", { targetInstance: instanceId });
+    await webpushQueue.add("sync-following", { targetInstance: vmName });
   } catch (e) {
     console.error(`X| Setup failed for ${acc.login}:`, e);
-    await teardown(instanceId);
+    await teardown(vmName);
     return runWithAccount(retries + 1);
   }
 }
 
-const { postWorker, mgmtWorker } = buildWorkers(gql, xRef, instanceId);
+const { postWorker, mgmtWorker } = buildWorkers(gql, xRef, vmName);
 async function main() {
   console.log("🚀 Starting Web Push Service...");
 
@@ -70,7 +70,7 @@ const cleanup = async () => {
   }, 8000);
 
   await Promise.all([
-    teardown(instanceId),
+    teardown(vmName),
     postWorker.close(),
     mgmtWorker.close(),
     tweetQueue.close(),
