@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "apps/app/**/*.ts",
+    "apps/app/**/*.d.ts",
+    "packages/config/**/*.ts",
+    "packages/constants/**/*.ts",
+    "packages/core/**/*.ts",
+    "packages/core/**/*.d.ts",
+    "packages/prisma/**/*.ts",
+    "prisma.config.ts"
+  ],
+  "exclude": [
+    "apps/dashboard/**",
+    "apps/discord/**",
+    "apps/doc/**",
+    "apps/txid/**",
+    "apps/web_poll/**",
+    "apps/web_push/**",
+    "scripts/**"
+  ]
+}

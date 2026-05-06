@@ -1,0 +1,21 @@
+{
+  "registration_ids": [
+    "https://updates.push.services.mozilla.com/wpush/v2/gAAAAABphUClibLMTzaBnAOLFT_Qvlf-NgV92SMUZlbCK24n17UoB3XqfZ6rS94h6Qgkbb11iNbowbAs9j-bHVtHqkin8XYTC7LF7t0-uscZBrolmYS9fjptvzMEu8X1Z9Lv7Kh4Ph-xJyOxVGedxu0yTO7wHs2PIU8pDvbVKnVgseg25kY4Rvc"
+  ],
+  "title": "Steven Tomi",
+  "body": "All I want, is to take a trip to Ibiza",
+  "icon": "https://pbs.twimg.com/profile_images/1941257784021901313/4Hio8b0v_reasonably_small.jpg",
+  "timestamp": "1770346787609",
+  "tag": "tweet-2019606922824151397",
+  "data": {
+    "lang": "en",
+    "bundle_text": "{num_total, number} new {num_total, plural, one {interaction} other {interactions}}",
+    "type": "tweet",
+    "uri": "/Steffqing/status/2019606922824151397",
+    "impression_id": "d0f23f726d584ac0bee109e39ac00b35",
+    "title": "Steven Tomi",
+    "body": "All I want, is to take a trip to Ibiza",
+    "tag": "tweet-2019606922824151397",
+    "scribe_target": "tweet"
+  }
+}

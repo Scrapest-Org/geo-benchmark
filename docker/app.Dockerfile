@@ -1,0 +1,25 @@
+FROM oven/bun:1.3.9 AS base
+WORKDIR /app
+
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+COPY packages/ /temp/dev/packages/
+COPY apps/ /temp/dev/apps/
+RUN find /temp/dev -type f -not -name "package.json" -not -name "bun.lock" -delete
+RUN cd /temp/dev && bun install --frozen-lockfile
+
+FROM base AS release
+WORKDIR /app
+COPY --from=install /temp/dev/node_modules ./node_modules
+COPY package.json .
+COPY packages/ ./packages
+COPY apps/app/ .
+
+ENV PORT=6969 \
+    NODE_ENV=production
+
+EXPOSE 6969
+
+USER bun
+ENTRYPOINT [ "bun", "run", "index.ts" ]

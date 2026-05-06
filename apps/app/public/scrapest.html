@@ -1,0 +1,2041 @@
+<!doctype html>
+<html lang="en" class="light-mode">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="High-Speed Data Extraction Engine" />
+    <meta name="title" content="Scrapest" />
+    <meta name="robots" content="noindex" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://delete-clash-01064955.figma.site/"
+    />
+    <meta name="twitter:title" content="Scrapest" />
+    <meta
+      name="twitter:description"
+      content="High-Speed Data Extraction Engine"
+    />
+    <meta property="og:title" content="scrape.st" />
+    <meta
+      property="og:description"
+      content="High-Speed Data Extraction Engine"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://scrape.st" />
+    <meta property="og:site_name" content="scrape.st" />
+    <title>Scrapest | High-Speed Data Extraction Engine</title>
+    <link rel="icon" type="image/svg+xml" href="/navbar-logo.svg" />
+
+    <!-- Google Fonts: Urbanist -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "primary-blue": "#0055ff",
+              zinc: {
+                900: "#18181b",
+                800: "#27272a",
+                700: "#3f3f46",
+                600: "#52525b",
+                500: "#71717a",
+                400: "#a1a1aa",
+                300: "#d4d4d8",
+                200: "#e4e4e7",
+              },
+            },
+            fontFamily: {
+              Urbanist: ["Urbanist", "sans-serif"],
+              mono: [
+                "ui-monospace",
+                "SFMono-Regular",
+                "Menlo",
+                "Monaco",
+                "Consolas",
+                '"Liberation Mono"',
+                '"Courier New"',
+                "monospace",
+              ],
+            },
+            keyframes: {
+              pulse: { "50%": { opacity: "0.5" } },
+              floatY: {
+                "0%, 100%": { transform: "translateY(0px)" },
+                "50%": { transform: "translateY(-12px)" },
+              },
+              streamScroll: {
+                "0%": { transform: "translateY(0)" },
+                "100%": { transform: "translateY(-50%)" },
+              },
+            },
+            animation: {
+              pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+              float: "floatY 4s ease-in-out infinite",
+              "float-slow": "floatY 5.5s ease-in-out infinite",
+              "float-slower": "floatY 7s ease-in-out infinite",
+              stream: "streamScroll 18s linear infinite",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ===== LIGHT / DARK MODE ===== */
+      html.light-mode {
+        filter: invert() hue-rotate(180deg) contrast(1.1);
+        color: rgb(0, 0, 0);
+        background-color: rgb(255, 255, 255);
+      }
+      html.light-mode img,
+      html.light-mode video,
+      html.light-mode .selection-tag,
+      html.light-mode .social-icon,
+      html.light-mode .navbar-logo {
+        filter: invert() hue-rotate(180deg);
+      }
+      html.light-mode .x-icon {
+        color: rgb(0, 0, 0) !important;
+      }
+      html.light-mode .discord-icon {
+        color: rgb(88, 101, 242) !important;
+      }
+      html.light-mode .telegram-icon {
+        color: rgb(34, 158, 217) !important;
+      }
+      html.light-mode .reddit-icon {
+        color: rgb(255, 69, 0) !important;
+      }
+      html.light-mode .social-icon {
+        opacity: 0.6;
+        transition: opacity 0.2s;
+      }
+      html.light-mode .social-icon:hover {
+        opacity: 1;
+      }
+
+      /* ===== CUSTOM UTILITIES ===== */
+      :root {
+        --primary-blue: #0055ff;
+      }
+
+      /* Selection colors */
+      ::selection {
+        background-color: #0055ff;
+        color: white;
+      }
+
+      /* Smooth scroll */
+      html {
+        scroll-behavior: smooth;
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      /* Custom float animations with staggered delays */
+      .float-icon-1 {
+        animation: floatA 4.2s ease-in-out infinite;
+      }
+      .float-icon-2 {
+        animation: floatB 5.8s ease-in-out infinite 0.5s;
+      }
+      .float-icon-3 {
+        animation: floatC 4.9s ease-in-out infinite 1s;
+      }
+      .float-icon-4 {
+        animation: floatD 6.1s ease-in-out infinite 1.5s;
+      }
+
+      @keyframes floatA {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-14px);
+        }
+      }
+      @keyframes floatB {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      @keyframes floatC {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-16px);
+        }
+      }
+      @keyframes floatD {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      /* Scroll-reveal */
+      .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(4px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease,
+          filter 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+
+      /* Stream row drop-in animation */
+      @keyframes streamRowIn {
+        0% {
+          opacity: 0;
+          transform: translateY(-100%);
+        }
+        60% {
+          opacity: 1;
+          transform: translateY(4px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .stream-row-enter {
+        animation: streamRowIn 0.35s ease-out forwards;
+      }
+      .stream-row-exit {
+        opacity: 0;
+        transform: translateY(8px);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+
+      /* Hover group effects for table rows */
+      .connector-row {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .connector-row:hover .connector-cell,
+      .connector-row.active .connector-cell {
+        background-color: #050505;
+      }
+      .connector-row:hover .row-icon,
+      .connector-row.active .row-icon {
+        color: white;
+      }
+      .connector-row:hover .row-target-name,
+      .connector-row.active .row-target-name {
+        color: white;
+      }
+      .connector-row:hover .connector-cell span,
+      .connector-row.active .connector-cell span {
+        color: #d4d4d8;
+      }
+      .connector-row:hover .row-status-dot,
+      .connector-row.active .row-status-dot {
+        background-color: #0055ff;
+      }
+      .connector-row:hover .row-status-text,
+      .connector-row.active .row-status-text {
+        color: #0055ff !important;
+      }
+      .connector-row:hover .row-action-btn,
+      .connector-row.active .row-action-btn {
+        border-color: #0055ff;
+        background-color: #0055ff;
+        color: white;
+      }
+
+      /* Expandable telemetry panel */
+      .row-expand {
+        max-height: 0;
+        overflow: hidden;
+        transition:
+          max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.3s ease;
+        opacity: 0;
+        background-color: #000;
+      }
+      .connector-row:hover .row-expand,
+      .connector-row.active .row-expand {
+        max-height: 200px;
+        opacity: 1;
+      }
+      .row-expand-inner {
+        display: grid;
+        gap: 32px;
+        background-color: #020202;
+        border-top: 1px solid #18181b;
+        padding: 24px;
+        grid-template-columns: 1fr;
+        font-size: 10px;
+        @media (min-width: 768px) {
+          padding: 32px;
+          gap: 48px;
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+      .telemetry-col {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .telemetry-col-label {
+        font-size: 9px;
+        color: #52525b;
+        letter-spacing: 0.12em;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      .endpoint-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border: 1px solid #27272a;
+        color: #0055ff;
+        font-size: 10px;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 0.03em;
+        text-decoration: none;
+        transition:
+          border-color 0.2s,
+          background-color 0.2s;
+      }
+      .endpoint-link:hover {
+        border-color: #0055ff;
+        background-color: #050505;
+      }
+      .endpoint-link svg {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+        margin-left: 8px;
+      }
+      .telemetry-value-box {
+        padding: 12px 16px;
+        border: 1px solid #2a2627;
+        font-size: 11px;
+        color: #a1a1aa;
+        font-weight: 600;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 0.03em;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+      .telemetry-content-box {
+        color: #a1a1aa;
+        font-weight: 600;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        letter-spacing: 0.03em;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* Group hover on feature card text */
+      .feature-card:hover .card-link-text {
+        color: white;
+      }
+      .feature-card:hover .card-icon-wrap {
+        background-color: #18181b;
+        border-color: #3f3f46;
+      }
+
+      /* Group hover arrow translate */
+      .arrow-group:hover .arrow-icon {
+        transform: translateX(4px);
+      }
+      .arrow-icon {
+        transition: transform 0.2s ease;
+      }
+
+      /* Nav INITIATE button arrow */
+      .initiate-btn:hover .initiate-arrow {
+        transform: translateX(4px);
+      }
+      .initiate-arrow {
+        transition: transform 0.15s ease;
+      }
+
+      /* Dots pulse */
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      /* Scrollbar hidden for data stream */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Group hover for "View Documentation" links in cards */
+      .group:hover .group-hover\:text-white {
+        color: white;
+      }
+
+      /* Mode button glow */
+      .mode-btn:hover {
+        border-color: #71717a;
+        color: white;
+      }
+
+      /* footer hover links */
+      footer a:hover {
+        color: white;
+      }
+
+      /* bg-primary-blue helper */
+      .bg-primary-blue {
+        background-color: #0055ff;
+      }
+      .text-primary-blue {
+        color: #0055ff;
+      }
+      .border-primary-blue {
+        border-color: #0055ff;
+      }
+    </style>
+  </head>
+  <body class="bg-black">
+    <main
+      class="min-h-screen bg-black text-white selection:text-white transition-colors duration-300"
+    >
+      <!-- ====== HEADER ====== -->
+      <header
+        id="site-header"
+        class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-zinc-900"
+        style="opacity: 1; transform: none"
+      >
+        <div class="mx-auto flex h-14 w-full items-stretch justify-between">
+          <!-- Left: Logo + version -->
+          <div class="flex items-stretch">
+            <div
+              class="navbar-logo flex items-center px-6 border-r border-zinc-900 bg-[#0055FF] text-white"
+            >
+              <img
+                src="navbar-logo.png"
+                style="filter: contrast()"
+                alt="Scrapest"
+                class="h-5 w-5 object-contain brightness-0 invert"
+              />
+            </div>
+            <div
+              class="hidden sm:flex items-center px-6 border-r border-zinc-900 bg-black text-zinc-500 font-mono text-[10px] tracking-widest uppercase"
+            >
+              v2.4.0-stable
+            </div>
+          </div>
+
+          <!-- Center nav -->
+          <nav class="hidden md:flex items-stretch">
+            <a
+              class="flex items-center px-6 border-l border-zinc-900 text-[10px] font-mono font-medium text-zinc-400 hover:text-white hover:bg-[#050505] transition-colors uppercase tracking-widest"
+              href="https://docs.scrape.st"
+              target="_blank"
+              >Documentation</a
+            >
+            <div
+              class="flex items-center px-6 border-l border-zinc-900 text-[10px] font-mono text-zinc-600 uppercase tracking-widest cursor-not-allowed"
+              style="
+                background-image: url(&quot;data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMxMTEiLz48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjMjIyIi8+PC9zdmc+&quot;);
+              "
+            >
+              Admin Dashboard [LOCKED]
+            </div>
+          </nav>
+
+          <!-- Right: Login + CTA -->
+          <div class="flex items-stretch ml-auto md:ml-0">
+            <a
+              class="hidden sm:flex items-center px-6 border-l border-zinc-900 text-[10px] font-mono font-medium text-zinc-400 hover:text-white hover:bg-[#050505] transition-colors uppercase tracking-widest"
+              href="https://admin.scrape.st"
+              >Login</a
+            >
+            <a
+              href="#LIVE_EXTRACTION_STREAM"
+              class="group flex items-center px-6 border-l border-zinc-900 bg-white text-black hover:bg-zinc-200 transition-colors text-[10px] font-mono font-bold uppercase tracking-widest gap-2"
+            >
+              INITIATE
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-3 w-3 transform group-hover:translate-x-1 transition-transform"
+              >
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <!-- ====== HERO SECTION ====== -->
+      <section
+        class="relative w-full min-h-screen pt-14 flex flex-col bg-black border-b border-zinc-900 overflow-hidden text-white font-mono uppercase tracking-widest text-xs"
+      >
+        <!-- Floating Social Icons Background -->
+        <div
+          class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none"
+        >
+          <!-- X/Twitter — top-left -->
+          <div
+            class="absolute top-[15%] left-[8%] md:top-[18%] md:left-[15%]"
+            style="
+              will-change: transform, filter, opacity;
+              opacity: 1;
+              filter: blur(0);
+            "
+          >
+            <div
+              class="float-icon-1 w-16 h-16 md:w-24 md:h-24 bg-black border border-zinc-800 rounded-none flex items-center justify-center shadow-2xl"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-8 h-8 md:w-12 md:h-12 text-zinc-500"
+              >
+                <path
+                  d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Reddit — middle-left -->
+          <div
+            class="absolute top-[45%] left-[5%] md:top-[50%] md:left-[10%]"
+            style="
+              will-change: transform, filter, opacity;
+              opacity: 1;
+              filter: blur(0);
+            "
+          >
+            <div
+              class="float-icon-2 w-14 h-14 md:w-20 md:h-20 bg-[#050505] border border-zinc-800 rounded-none flex items-center justify-center shadow-2xl"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-7 h-7 md:w-10 md:h-10 text-zinc-600"
+              >
+                <path
+                  d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.56 12 8 12.562 8 13.25c0 .687.56 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249c0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249c0-.688-.561-1.249-1.249-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Discord — top-right -->
+          <div
+            class="absolute top-[22%] right-[6%] md:top-[15%] md:right-[12%]"
+            style="
+              will-change: transform, filter, opacity;
+              opacity: 1;
+              filter: blur(0);
+            "
+          >
+            <div
+              class="float-icon-3 w-16 h-16 md:w-24 md:h-24 bg-black border border-zinc-800 rounded-none flex items-center justify-center shadow-[0_0_40px_rgba(0,85,255,0.05)]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-8 h-8 md:w-12 md:h-12 text-zinc-500"
+              >
+                <path
+                  d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Telegram — middle-right -->
+          <div
+            class="absolute top-[50%] right-[4%] md:top-[45%] md:right-[15%]"
+            style="
+              will-change: transform, filter, opacity;
+              opacity: 1;
+              filter: blur(0);
+            "
+          >
+            <div
+              class="float-icon-4 w-14 h-14 md:w-20 md:h-20 bg-[#050505] border border-zinc-800 rounded-none flex items-center justify-center shadow-2xl"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="w-7 h-7 md:w-10 md:h-10 text-zinc-600"
+              >
+                <path
+                  d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.896-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radial gradient overlay -->
+        <div
+          class="absolute inset-0 w-full h-full opacity-40 z-0 pointer-events-none"
+        >
+          <div
+            class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]"
+          ></div>
+        </div>
+
+        <!-- Hero Content -->
+        <div
+          class="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-7xl mx-auto px-6 pt-24 pb-20 mt-10 md:mt-0 gap-16 md:gap-24"
+        >
+          <!-- Headline Block -->
+          <div
+            class="flex flex-col items-center text-center max-w-4xl mx-auto z-20 pointer-events-none"
+          >
+            <div
+              class="selection-tag reveal visible mb-8 bg-primary-blue text-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] shadow-2xl inline-block"
+            >
+              [ ENTERPRISE DATA EXTRACTION ]
+            </div>
+            <h1
+              class="text-5xl sm:text-7xl md:text-[5.5rem] font-['Urbanist'] font-medium tracking-tighter text-white normal-case leading-none mb-8 flex flex-col items-center gap-2 reveal visible"
+            >
+              <span>Scrape the</span>
+              <span class="selection-tag inline-block"
+                ><span id="scramble-target" class="text-primary-blue"
+                  >entire web.</span
+                ></span
+              >
+            </h1>
+            <p
+              class="text-zinc-400 font-mono tracking-widest text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed reveal visible"
+            >
+              A premium, high-speed scraping engine built for modern platforms.
+              Scale your data collection with enterprise-grade reliability and
+              military-grade stealth.
+            </p>
+
+            <!-- Supported Targets -->
+            <div
+              class="mt-12 flex flex-col items-center justify-center gap-6 pt-8 w-full max-w-md pointer-events-auto reveal visible"
+              id="LIVE_EXTRACTION_STREAM"
+            >
+              <span
+                class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest"
+                >SUPPORTED EXTRACTION TARGETS</span
+              >
+              <div class="flex items-center justify-center gap-8 text-zinc-600">
+                <!-- X -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="social-icon x-icon w-5 h-5 hover:text-white transition-colors cursor-crosshair"
+                >
+                  <path
+                    d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"
+                  ></path>
+                </svg>
+                <!-- Discord -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="social-icon discord-icon w-6 h-6 hover:text-white transition-colors cursor-crosshair"
+                >
+                  <path
+                    d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"
+                  ></path>
+                </svg>
+                <!-- Telegram -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="social-icon telegram-icon w-6 h-6 hover:text-white transition-colors cursor-crosshair"
+                >
+                  <path
+                    d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.896-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+                  ></path>
+                </svg>
+                <!-- Reddit -->
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="social-icon reddit-icon w-6 h-6 hover:text-white transition-colors cursor-crosshair"
+                >
+                  <path
+                    d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.56 12 8 12.562 8 13.25c0 .687.56 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249c0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249c0-.688-.561-1.249-1.249-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Terminal Panel -->
+          <div
+            class="w-full max-w-5xl border border-zinc-800 bg-[#050505] shadow-[0_0_40px_rgba(0,85,255,0.05)] flex flex-col md:flex-row z-20 reveal visible"
+          >
+            <!-- Sidebar -->
+            <div
+              class="w-full md:w-64 flex flex-col border-b md:border-b-0 md:border-r border-zinc-800 shrink-0"
+            >
+              <div
+                class="flex items-center justify-between border-b border-zinc-800 bg-black p-3 md:px-4 md:py-3 text-[10px] tracking-widest text-zinc-500"
+              >
+                <span>ACTIVE_TARGETS</span>
+                <span class="text-primary-blue">4/4</span>
+              </div>
+              <div class="flex flex-col">
+                <!-- X / TWITTER -->
+                <div
+                  class="p-3 md:px-4 md:py-4 flex items-center justify-between border-b border-zinc-800 bg-[#020202]"
+                >
+                  <span class="font-bold text-zinc-300 text-[10px]"
+                    >X / TWITTER</span
+                  >
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-[9px] text-zinc-600 hidden sm:inline-block"
+                      >CONNECTED</span
+                    >
+                    <span
+                      class="w-1.5 h-1.5 bg-primary-blue animate-pulse inline-block"
+                      style="animation-delay: 0s"
+                    ></span>
+                  </div>
+                </div>
+                <!-- DISCORD -->
+                <div
+                  class="p-3 md:px-4 md:py-4 flex items-center justify-between border-b border-zinc-800 bg-[#020202]"
+                >
+                  <span class="font-bold text-zinc-300 text-[10px]"
+                    >DISCORD</span
+                  >
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-[9px] text-zinc-600 hidden sm:inline-block"
+                      >CONNECTED</span
+                    >
+                    <span
+                      class="w-1.5 h-1.5 bg-primary-blue animate-pulse inline-block"
+                      style="animation-delay: 0.2s"
+                    ></span>
+                  </div>
+                </div>
+                <!-- TELEGRAM -->
+                <div
+                  class="p-3 md:px-4 md:py-4 flex items-center justify-between border-b border-zinc-800 bg-[#020202]"
+                >
+                  <span class="font-bold text-zinc-300 text-[10px]"
+                    >TELEGRAM</span
+                  >
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-[9px] text-zinc-600 hidden sm:inline-block"
+                      >CONNECTED</span
+                    >
+                    <span
+                      class="w-1.5 h-1.5 bg-primary-blue animate-pulse inline-block"
+                      style="animation-delay: 0.4s"
+                    ></span>
+                  </div>
+                </div>
+                <!-- REDDIT -->
+                <div
+                  class="p-3 md:px-4 md:py-4 flex items-center justify-between border-b border-zinc-800 bg-[#020202]"
+                >
+                  <span class="font-bold text-zinc-300 text-[10px]"
+                    >REDDIT</span
+                  >
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-[9px] text-zinc-600 hidden sm:inline-block"
+                      >CONNECTED</span
+                    >
+                    <span
+                      class="w-1.5 h-1.5 bg-primary-blue animate-pulse inline-block"
+                      style="animation-delay: 0.6s"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+              <div class="p-3 md:px-4 md:py-3 mt-auto bg-black hidden md:block">
+                <div class="text-[9px] text-zinc-500 mb-1">
+                  TOTAL_VOLUME (24H)
+                </div>
+                <div
+                  id="total-volume-counter"
+                  class="text-primary-blue font-bold text-sm tracking-tighter"
+                >
+                  1.4M RECORDS
+                </div>
+              </div>
+            </div>
+
+            <!-- Stream Panel -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+              <div
+                class="flex items-center justify-between border-b border-zinc-800 bg-black p-3 md:px-6 md:py-3 text-[10px] tracking-widest text-zinc-500"
+              >
+                <span>LIVE_EXTRACTION_STREAM</span>
+                <span
+                  class="hidden sm:inline-block text-zinc-600 border border-zinc-800 px-2 py-0.5 bg-[#020202]"
+                  >RATE: 4,032 OPS/S</span
+                >
+              </div>
+              <div
+                class="flex flex-col h-[280px] overflow-hidden no-scrollbar"
+                style="
+                  background-image: url(&quot;data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMwNTA1MDUiLz48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjMGYwZjBmIi8+PC9zdmc+&quot;);
+                "
+              >
+                <!-- Header row -->
+                <div
+                  class="flex items-center px-4 py-2 border-b border-zinc-900 bg-[#050505]/80 text-[9px] text-zinc-500 sticky top-0 z-10"
+                >
+                  <div class="w-24 shrink-0">TIMESTAMP</div>
+                  <div class="w-28 shrink-0">SOURCE</div>
+                  <div class="flex-1 truncate">RAW_PAYLOAD</div>
+                </div>
+                <!-- Live stream feed (JS-driven, rows plop in one by one) -->
+                <div
+                  id="stream-feed"
+                  class="flex-1 overflow-hidden relative flex flex-col"
+                >
+                  <!-- Rows are prepended here by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /terminal panel -->
+        </div>
+      </section>
+
+      <!-- ====== PLATFORM CONNECTORS SECTION ====== -->
+      <section
+        class="bg-black border-b border-zinc-900 relative text-white font-mono text-xs uppercase"
+      >
+        <div
+          class="w-full flex flex-col justify-center py-24 sm:py-32 overflow-hidden"
+        >
+          <div class="mx-auto max-w-7xl w-full px-6 lg:px-8">
+            <!-- Section header -->
+            <div
+              class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+            >
+              <div class="max-w-2xl">
+                <div
+                  class="flex items-center gap-3 mb-4 text-xs tracking-[0.2em] font-mono uppercase"
+                >
+                  <span
+                    class="selection-tag bg-primary-blue text-white px-3 py-1 reveal visible"
+                    >[ Routing Table ]</span
+                  >
+                </div>
+                <h2
+                  class="text-4xl sm:text-5xl font-medium tracking-tight text-white uppercase leading-none font-sans reveal visible"
+                >
+                  Native Platform Connectors.
+                </h2>
+              </div>
+              <p
+                class="text-zinc-500 max-w-sm tracking-widest leading-relaxed reveal visible"
+              >
+                Direct integrations with primary data sources. Hover to view
+                extraction protocols and live network telemetry.
+              </p>
+            </div>
+
+            <!-- Table -->
+            <div
+              class="w-full bg-zinc-900 border border-zinc-900 grid grid-cols-1 md:grid-cols-12 gap-[1px] reveal visible"
+            >
+              <!-- Header row (desktop) -->
+              <div
+                class="hidden md:block col-span-3 bg-black p-4 text-zinc-600 tracking-widest border-b border-zinc-900"
+              >
+                Target
+              </div>
+              <div
+                class="hidden md:block col-span-2 bg-black p-4 text-zinc-600 tracking-widest border-b border-zinc-900"
+              >
+                Protocol
+              </div>
+              <div
+                class="hidden md:block col-span-2 bg-black p-4 text-zinc-600 tracking-widest border-b border-zinc-900"
+              >
+                Latency
+              </div>
+              <div
+                class="hidden md:block col-span-2 bg-black p-4 text-zinc-600 tracking-widest border-b border-zinc-900"
+              >
+                Status
+              </div>
+              <div
+                class="hidden md:block col-span-3 bg-black p-4 text-zinc-600 tracking-widest border-b border-zinc-900 text-right"
+              >
+                Action
+              </div>
+
+              <!-- TWITTER ROW -->
+              <div
+                class="connector-row col-span-1 md:col-span-12 cursor-pointer"
+                data-source="twitter"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-[1px]">
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start gap-3 bg-black text-zinc-300"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">TARGET</span>
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="row-icon flex items-center justify-center w-6 h-6 transition-colors text-zinc-500"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="w-4 h-4 shrink-0"
+                        >
+                          <path
+                            d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span class="row-target-name transition-colors"
+                        >TWITTER_FIREHOSE</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">PROTOCOL</span
+                    ><span>WSS/HTTPS</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">LATENCY</span
+                    ><span data-metric="latency">67ms</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">STATUS</span>
+                    <span class="flex items-center gap-2 text-zinc-500"
+                      ><div
+                        data-metric="status-dot"
+                        class="row-status-dot w-1.5 h-1.5 bg-zinc-700 transition-colors"
+                      ></div>
+                      <span
+                        data-metric="status-text"
+                        class="row-status-text transition-colors text-zinc-500 uppercase"
+                        >ACTIVE</span
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between bg-black text-zinc-500"
+                  >
+                    <p class="truncate mr-4 hidden md:block">
+                      Advanced scraping for profiles &amp; trends.
+                    </p>
+                    <a
+                      href="https://docs.scrape.st"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="row-action-btn h-8 w-8 border flex items-center justify-center transition-all shrink-0 ml-auto cursor-pointer border-zinc-800 text-zinc-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4"
+                      >
+                        <path d="M7 7h10v10"></path>
+                        <path d="M7 17 17 7"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <!-- Expandable telemetry panel -->
+                <div class="row-expand">
+                  <div class="row-expand-inner">
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">ACTIVE_ENDPOINTS</span>
+                      <div class="telemetry-content-box">
+                        <a
+                          href="https://docs.scrape.st/scrapest/api-reference/x/user"
+                          class="endpoint-link"
+                          >/x/user
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" /></svg
+                        ></a>
+                        <a
+                          href="https://docs.scrape.st/scrapest/api-reference/x/tweet"
+                          class="endpoint-link"
+                          >/x/tweet
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" /></svg
+                        ></a>
+                      </div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">THROTTLING_RULES</span>
+                      <div class="telemetry-value-box">
+                        1000/S (AUTOMATED ROTATION)
+                      </div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">PAYLOAD_FORMAT</span>
+                      <div class="telemetry-value-box">JSON / MEDIA ARRAYS</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DISCORD ROW -->
+              <div
+                class="connector-row col-span-1 md:col-span-12 cursor-pointer"
+                data-source="discord"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-[1px]">
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start gap-3 bg-black text-zinc-300"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">TARGET</span>
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="row-icon flex items-center justify-center w-6 h-6 transition-colors text-zinc-500"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="w-5 h-5 shrink-0"
+                        >
+                          <path
+                            d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span class="row-target-name transition-colors"
+                        >DISCORD_WSS</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">PROTOCOL</span
+                    ><span>WEBSOCKET</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">LATENCY</span
+                    ><span data-metric="latency">24ms</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">STATUS</span>
+                    <span class="flex items-center gap-2 text-zinc-500"
+                      ><div
+                        data-metric="status-dot"
+                        class="row-status-dot w-1.5 h-1.5 bg-zinc-700 transition-colors"
+                      ></div>
+                      <span
+                        data-metric="status-text"
+                        class="row-status-text transition-colors text-zinc-500 uppercase"
+                        >INDEXING</span
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between bg-black text-zinc-500"
+                  >
+                    <p class="truncate mr-4 hidden md:block">
+                      Index messages &amp; server metadata.
+                    </p>
+                    <a
+                      href="https://docs.scrape.st"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="row-action-btn h-8 w-8 border flex items-center justify-center transition-all shrink-0 ml-auto cursor-pointer border-zinc-800 text-zinc-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4"
+                      >
+                        <path d="M7 7h10v10"></path>
+                        <path d="M7 17 17 7"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div class="row-expand">
+                  <div class="row-expand-inner">
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">ACTIVE_ENDPOINTS</span>
+                      <a href="#" class="endpoint-link"
+                        >WSS://GATEWAY.DISCORD.GG/?V=10
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M7 7h10v10" />
+                          <path d="M7 17 17 7" /></svg
+                      ></a>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">THROTTLING_RULES</span>
+                      <div class="telemetry-value-box">120/MIN PER TOKEN</div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">PAYLOAD_FORMAT</span>
+                      <div class="telemetry-value-box">
+                        GATEWAY EVENTS (JSON)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TELEGRAM ROW -->
+              <div
+                class="connector-row col-span-1 md:col-span-12 cursor-pointer"
+                data-source="telegram"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-[1px]">
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start gap-3 bg-black text-zinc-300"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">TARGET</span>
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="row-icon flex items-center justify-center w-6 h-6 transition-colors text-zinc-500"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="w-5 h-5 shrink-0"
+                        >
+                          <path
+                            d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.896-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span class="row-target-name transition-colors"
+                        >TELEGRAM_API</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">PROTOCOL</span
+                    ><span>MTProto</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">LATENCY</span
+                    ><span data-metric="latency">18ms</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">STATUS</span>
+                    <span class="flex items-center gap-2 text-zinc-500"
+                      ><div
+                        data-metric="status-dot"
+                        class="row-status-dot w-1.5 h-1.5 bg-zinc-700 transition-colors"
+                      ></div>
+                      <span
+                        data-metric="status-text"
+                        class="row-status-text transition-colors text-zinc-500 uppercase"
+                        >SYNCED</span
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between bg-black text-zinc-500"
+                  >
+                    <p class="truncate mr-4 hidden md:block">
+                      Parsing of channel history &amp; global search.
+                    </p>
+                    <a
+                      href="https://docs.scrape.st"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="row-action-btn h-8 w-8 border flex items-center justify-center transition-all shrink-0 ml-auto cursor-pointer border-zinc-800 text-zinc-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4"
+                      >
+                        <path d="M7 7h10v10"></path>
+                        <path d="M7 17 17 7"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div class="row-expand">
+                  <div class="row-expand-inner">
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">ACTIVE_ENDPOINTS</span>
+                      <a href="#" class="endpoint-link"
+                        >MTPROTO CORE
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M7 7h10v10" />
+                          <path d="M7 17 17 7" /></svg
+                      ></a>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">THROTTLING_RULES</span>
+                      <div class="telemetry-value-box">
+                        UNLIMITED (ROTATED IPS)
+                      </div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">PAYLOAD_FORMAT</span>
+                      <div class="telemetry-value-box">BINARY / TL-SCHEME</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- REDDIT ROW -->
+              <div
+                class="connector-row col-span-1 md:col-span-12 cursor-pointer"
+                data-source="reddit"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-[1px]">
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start gap-3 bg-black text-zinc-300"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">TARGET</span>
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="row-icon flex items-center justify-center w-6 h-6 transition-colors text-zinc-500"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          class="w-5 h-5 shrink-0"
+                        >
+                          <path
+                            d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.56 12 8 12.562 8 13.25c0 .687.56 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249c0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249c0-.688-.561-1.249-1.249-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <span class="row-target-name transition-colors"
+                        >REDDIT_THREAD</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">PROTOCOL</span
+                    ><span>HTTPS</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black text-zinc-500"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">LATENCY</span
+                    ><span data-metric="latency">35ms</span>
+                  </div>
+                  <div
+                    class="connector-cell col-span-2 p-4 md:p-6 transition-colors flex items-center justify-between md:justify-start bg-black"
+                  >
+                    <span class="md:hidden text-zinc-600 mr-4">STATUS</span>
+                    <span class="flex items-center gap-2 text-zinc-500"
+                      ><div
+                        data-metric="status-dot"
+                        class="row-status-dot w-1.5 h-1.5 bg-zinc-700 transition-colors"
+                      ></div>
+                      <span
+                        data-metric="status-text"
+                        class="row-status-text transition-colors text-zinc-500 uppercase"
+                        >STOPPED</span
+                      ></span
+                    >
+                  </div>
+                  <div
+                    class="connector-cell col-span-3 p-4 md:p-6 transition-colors flex items-center justify-between bg-black text-zinc-500"
+                  >
+                    <p class="truncate mr-4 hidden md:block">
+                      Sentiment analysis &amp; deeply nested comments.
+                    </p>
+                    <a
+                      href="https://docs.scrape.st"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="row-action-btn h-8 w-8 border flex items-center justify-center transition-all shrink-0 ml-auto cursor-pointer border-zinc-800 text-zinc-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-4 w-4"
+                      >
+                        <path d="M7 7h10v10"></path>
+                        <path d="M7 17 17 7"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div class="row-expand">
+                  <div class="row-expand-inner">
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">ACTIVE_ENDPOINTS</span>
+                      <div class="telemetry-content-box">
+                        <a href="#" class="endpoint-link" style="height: 100%"
+                          >OAUTH2 / PRAW CLIENT
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M7 7h10v10" />
+                            <path d="M7 17 17 7" /></svg
+                        ></a>
+                      </div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">THROTTLING_RULES</span>
+                      <div class="telemetry-value-box">
+                        RATE_LIMIT_BY_SESSION
+                      </div>
+                    </div>
+                    <div class="telemetry-col">
+                      <span class="telemetry-col-label">PAYLOAD_FORMAT</span>
+                      <div class="telemetry-value-box">
+                        JSON / NESTED THREADS
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== CORE ARCHITECTURE SECTION ====== -->
+      <section class="bg-black py-24 sm:py-32 border-b border-zinc-900">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <!-- Section header -->
+          <div
+            class="mb-16 md:mb-24 flex flex-col md:flex-row md:items-end justify-between gap-8"
+          >
+            <div class="max-w-2xl">
+              <div class="w-fit mb-6">
+                <span
+                  class="selection-tag bg-primary-blue text-white px-3 py-1 text-xs font-mono uppercase tracking-[0.2em] inline-block reveal visible"
+                  >[ Core Architecture ]</span
+                >
+              </div>
+              <h2
+                class="text-4xl sm:text-5xl font-medium tracking-tight text-white uppercase leading-none reveal visible"
+              >
+                Engineered for absolute scale.
+              </h2>
+            </div>
+            <p
+              class="text-zinc-400 text-sm font-mono max-w-sm uppercase tracking-widest leading-relaxed reveal visible"
+            >
+              Military-grade extraction engine designed to strip unstructured
+              data directly from the wire.
+            </p>
+          </div>
+
+          <!-- Cards grid -->
+          <div
+            class="bg-zinc-900 border border-zinc-900 grid grid-cols-1 lg:grid-cols-3 gap-[1px] reveal visible"
+          >
+            <!-- Card 1: STEALTH PROXIES -->
+            <div
+              class="feature-card bg-black p-8 sm:p-12 flex flex-col group hover:bg-[#050505] transition-colors duration-300"
+            >
+              <div class="flex justify-between items-start mb-16">
+                <div
+                  class="text-primary-blue flex items-center justify-center w-10 h-10 border border-zinc-800 bg-[#050505] transition-colors group-hover:bg-zinc-900 group-hover:border-zinc-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-5 h-5"
+                    style="stroke-width: 1.5"
+                  >
+                    <path
+                      d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"
+                    ></path>
+                    <path d="M21 3v5h-5"></path>
+                  </svg>
+                </div>
+                <span
+                  class="text-zinc-600 text-xs font-mono uppercase tracking-widest"
+                  >99.9% UPTIME</span
+                >
+              </div>
+              <div class="mt-auto">
+                <h3
+                  class="text-xl font-medium text-white tracking-tight uppercase mb-2"
+                >
+                  STEALTH PROXIES
+                </h3>
+                <p
+                  class="text-zinc-500 text-xs font-mono uppercase tracking-widest mb-6"
+                >
+                  GLOBAL RESIDENTIAL NETWORK
+                </p>
+                <p class="text-zinc-400 text-sm leading-relaxed min-h-[80px]">
+                  A mesh network of 4M+ residential IP addresses. Our dynamic
+                  rotation algorithm changes fingerprints and subnets instantly,
+                  preventing IP bans before they happen.
+                </p>
+              </div>
+              <div
+                class="mt-8 pt-8 border-t border-zinc-900 flex justify-between items-center text-xs font-mono uppercase text-zinc-500 group-hover:text-white transition-colors cursor-pointer"
+              >
+                <span>View Documentation</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card 2: WSS HARVESTING -->
+            <div
+              class="feature-card bg-black p-8 sm:p-12 flex flex-col group hover:bg-[#050505] transition-colors duration-300"
+            >
+              <div class="flex justify-between items-start mb-16">
+                <div
+                  class="text-primary-blue flex items-center justify-center w-10 h-10 border border-zinc-800 bg-[#050505] transition-colors group-hover:bg-zinc-900 group-hover:border-zinc-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-5 h-5"
+                    style="stroke-width: 1.5"
+                  >
+                    <path d="M4 11a9 9 0 0 1 9 9"></path>
+                    <path d="M4 4a16 16 0 0 1 16 16"></path>
+                    <circle cx="5" cy="19" r="1"></circle>
+                  </svg>
+                </div>
+                <span
+                  class="text-zinc-600 text-xs font-mono uppercase tracking-widest"
+                  >&lt;70MS LATENCY</span
+                >
+              </div>
+              <div class="mt-auto">
+                <h3
+                  class="text-xl font-medium text-white tracking-tight uppercase mb-2"
+                >
+                  WSS HARVESTING
+                </h3>
+                <p
+                  class="text-zinc-500 text-xs font-mono uppercase tracking-widest mb-6"
+                >
+                  REAL-TIME EVENT STREAMS
+                </p>
+                <p class="text-zinc-400 text-sm leading-relaxed min-h-[80px]">
+                  Connect directly to proprietary WebSockets, streaming JSON
+                  payloads the millisecond they are published online. Zero
+                  polling overhead.
+                </p>
+              </div>
+              <a
+                class="mt-8 pt-8 border-t border-zinc-900 flex justify-between items-center text-xs font-mono uppercase text-zinc-500 group-hover:text-white transition-colors cursor-pointer"
+                href="https://docs.scrape.st/scrapest/api-reference/websocket"
+                target="_blank"
+              >
+                <span>View Documentation</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg>
+              </a>
+            </div>
+
+            <!-- Card 3: HEADLESS CLUSTER -->
+            <div
+              class="feature-card bg-black p-8 sm:p-12 flex flex-col group hover:bg-[#050505] transition-colors duration-300"
+            >
+              <div class="flex justify-between items-start mb-16">
+                <div
+                  class="text-primary-blue flex items-center justify-center w-10 h-10 border border-zinc-800 bg-[#050505] transition-colors group-hover:bg-zinc-900 group-hover:border-zinc-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="w-5 h-5"
+                    style="stroke-width: 1.5"
+                  >
+                    <rect
+                      width="20"
+                      height="8"
+                      x="2"
+                      y="2"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <rect
+                      width="20"
+                      height="8"
+                      x="2"
+                      y="14"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <line x1="6" x2="6.01" y1="6" y2="6"></line>
+                    <line x1="6" x2="6.01" y1="18" y2="18"></line>
+                  </svg>
+                </div>
+                <span
+                  class="text-zinc-600 text-xs font-mono uppercase tracking-widest"
+                  >10K+ CONCURRENT</span
+                >
+              </div>
+              <div class="mt-auto">
+                <h3
+                  class="text-xl font-medium text-white tracking-tight uppercase mb-2"
+                >
+                  HEADLESS CLUSTER
+                </h3>
+                <p
+                  class="text-zinc-500 text-xs font-mono uppercase tracking-widest mb-6"
+                >
+                  BROWSER EMULATION
+                </p>
+                <p class="text-zinc-400 text-sm leading-relaxed min-h-[80px]">
+                  Spin up headless instances infused with canvas poisoning and
+                  perfect TLS fingerprinting. Architected for undetectable
+                  browser-level scraping.
+                </p>
+              </div>
+              <div
+                class="mt-8 pt-8 border-t border-zinc-900 flex justify-between items-center text-xs font-mono uppercase text-zinc-500 group-hover:text-white transition-colors cursor-pointer"
+              >
+                <span>View Documentation</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== CTA SECTION ====== -->
+      <section
+        class="bg-black py-40 sm:py-56 border-b border-zinc-900 relative flex items-center justify-center min-h-[70vh]"
+      >
+        <!-- Grid background -->
+        <div class="absolute inset-0 z-0 flex items-center justify-center">
+          <div class="w-full h-full border-x border-zinc-900 flex">
+            <div class="flex-1 border-r border-zinc-900"></div>
+            <div class="flex-1 border-r border-zinc-900 hidden md:block"></div>
+            <div class="flex-1 border-r border-zinc-900 hidden md:block"></div>
+            <div class="flex-1"></div>
+          </div>
+          <div class="absolute inset-0 flex flex-col justify-between">
+            <div class="border-b border-zinc-900 h-1/3"></div>
+            <div class="border-b border-zinc-900 h-1/3"></div>
+          </div>
+        </div>
+
+        <div
+          class="mx-auto max-w-5xl px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center"
+        >
+          <div
+            class="bg-black border border-zinc-800 p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between w-full max-w-7xl mx-auto gap-8 reveal visible"
+          >
+            <!-- Left: text -->
+            <div
+              class="flex flex-col lg:flex-row items-center gap-6 lg:gap-8 w-full lg:w-auto text-center lg:text-left"
+            >
+              <div
+                class="flex items-center justify-center gap-3 bg-black border border-zinc-800 px-3 py-1.5 text-xs font-mono text-zinc-400 uppercase tracking-widest shrink-0"
+              >
+                <div class="w-1.5 h-1.5 bg-primary-blue selection-tag"></div>
+                CONNECTION READY
+              </div>
+              <h2
+                class="text-2xl sm:text-3xl font-medium tracking-tight text-white uppercase leading-none flex flex-wrap justify-center lg:justify-start gap-2 m-0"
+              >
+                <span>Initialize</span>
+                <span class="text-primary-blue selection-tag"
+                  >Data Pipeline.</span
+                >
+              </h2>
+            </div>
+
+            <!-- Right: buttons -->
+            <div
+              class="flex flex-col sm:flex-row items-stretch justify-center gap-[1px] w-full lg:w-auto bg-zinc-800 border border-zinc-800 p-[1px] shrink-0"
+            >
+              <a
+                href="https://admin.scrape.st"
+                target="_blank"
+                class="group flex-1 lg:flex-none bg-white text-black hover:bg-zinc-200 transition-colors px-6 py-4 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-4"
+              >
+                GET STARTED FREE
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4 transform group-hover:translate-x-1 transition-transform"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg>
+              </a>
+              <a
+                href="https://docs.scrape.st"
+                target="_blank"
+                class="flex-1 lg:flex-none bg-black text-zinc-400 hover:text-white transition-colors px-6 py-4 sm:px-8 sm:py-4 text-xs font-bold uppercase tracking-widest flex items-center justify-center group/docs"
+              >
+                VIEW DOCS
+                <span
+                  class="text-white opacity-0 group-hover/docs:opacity-100 transition-opacity ml-2 font-mono"
+                  >&gt;</span
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== FOOTER ====== -->
+      <footer class="bg-black border-t border-zinc-900">
+        <div
+          class="mx-auto w-full grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-900"
+        >
+          <!-- Col 1: Logo + description -->
+          <div
+            class="col-span-1 bg-black p-8 flex flex-col justify-between min-h-[200px]"
+          >
+            <div class="flex items-center gap-3">
+              <img
+                src="footer-logo.png"
+                alt="Scrapest"
+                class="h-5 object-contain invert"
+              />
+            </div>
+            <p
+              class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest mt-12 leading-relaxed"
+            >
+              Data Extraction Engine. Designed and deployed in late 2026. All
+              operations securely encrypted.<br class="mt-2" />
+              © 2026 Scrapest Corporation.
+            </p>
+          </div>
+
+          <!-- Col 2: Mode toggle -->
+          <div
+            class="col-span-1 bg-black p-8 flex flex-col justify-between items-start"
+          >
+            <h4
+              class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-900 pb-2 w-full mb-6"
+            >
+              System Interface
+            </h4>
+            <button
+              id="mode-toggle"
+              class="mode-btn flex items-center gap-3 bg-black border border-zinc-800 hover:border-zinc-500 px-4 py-2 text-xs font-mono text-zinc-400 hover:text-white uppercase tracking-widest transition-colors w-full"
+            >
+              <div class="w-1.5 h-1.5 bg-white"></div>
+              <span id="mode-label">MODE: DARK</span>
+            </button>
+          </div>
+
+          <!-- Col 3: Operations -->
+          <div class="p-8 flex flex-col gap-6">
+            <h4
+              class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-900 pb-2"
+            >
+              Operations
+            </h4>
+            <nav
+              class="flex flex-col gap-4 text-[10px] font-mono uppercase tracking-widest text-zinc-400"
+            >
+              <a
+                class="hover:text-white transition-colors"
+                href="https://docs.scrape.st"
+                target="_blank"
+                >Documentation</a
+              >
+              <a
+                class="hover:text-white transition-colors"
+                href="https://docs.scrape.st/scrapest/api-reference/auth/"
+                target="_blank"
+                >API Reference</a
+              >
+              <a
+                class="hover:text-white transition-colors"
+                href="https://scrape.st/metrics"
+                target="_blank"
+                >Metrics</a
+              >
+              <a
+                class="hover:text-white transition-colors"
+                href="https://scrape.st/health"
+                target="_blank"
+                >Health Status</a
+              >
+            </nav>
+          </div>
+
+          <!-- Col 4: Legal -->
+          <div class="p-8 flex flex-col gap-6">
+            <h4
+              class="text-zinc-600 font-mono text-[10px] uppercase tracking-widest border-b border-zinc-900 pb-2"
+            >
+              Legal
+            </h4>
+            <nav
+              class="flex flex-col gap-4 text-[10px] font-mono uppercase tracking-widest text-zinc-400"
+            >
+              <a class="hover:text-white transition-colors" href="#"
+                >Terms of Service</a
+              >
+              <a class="hover:text-white transition-colors" href="#"
+                >Privacy Policy</a
+              >
+              <a class="hover:text-white transition-colors" href="#"
+                >Data Processing</a
+              >
+              <a class="hover:text-white transition-colors" href="#"
+                >Compliance</a
+              >
+            </nav>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <script src="data-injector.js" defer></script>
+    <script src="stream-feed.js" defer></script>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+      // ─── Dark / Light Mode Toggle ───────────────────────────────────────────────
+      const html = document.documentElement;
+      const modeBtn = document.getElementById("mode-toggle");
+      const modeLabel = document.getElementById("mode-label");
+
+      // html already has class="light-mode" from the HTML attribute
+      // Button label: "MODE: DARK" = "click to enter dark mode" (currently in light)
+      modeBtn.addEventListener("click", () => {
+        const isLight = html.classList.contains("light-mode");
+        if (isLight) {
+          html.classList.remove("light-mode");
+          modeLabel.textContent = "MODE: LIGHT"; // currently dark, click to go light
+        } else {
+          html.classList.add("light-mode");
+          modeLabel.textContent = "MODE: DARK"; // currently light, click to go dark
+        }
+      });
+
+      // ─── Scroll-Reveal (IntersectionObserver) ───────────────────────────────────
+      const revealEls = document.querySelectorAll(".reveal");
+
+      // Elements in viewport on initial load should be visible immediately
+      revealEls.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          el.classList.add("visible");
+        }
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry, idx) => {
+            if (entry.isIntersecting) {
+              // Small stagger per element within a section
+              const delay = (idx % 4) * 80;
+              setTimeout(() => {
+                entry.target.classList.add("visible");
+              }, delay);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+      );
+
+      revealEls.forEach((el) => {
+        if (!el.classList.contains("visible")) observer.observe(el);
+      });
+
+      // ─── Header fade-in on load ─────────────────────────────────────────────────
+      (function () {
+        const header = document.getElementById("site-header");
+        header.style.opacity = "0";
+        header.style.transform = "translateY(-8px)";
+        header.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            header.style.opacity = "1";
+            header.style.transform = "none";
+          }),
+        );
+      })();
+
+      // ─── Live Stream Timestamp Updater ───────────────────────────────────────────
+      function liveTime(offsetMs) {
+        const d = new Date(Date.now() - offsetMs);
+        const h = String(d.getHours()).padStart(2, "0");
+        const m = String(d.getMinutes()).padStart(2, "0");
+        const s = String(d.getSeconds()).padStart(2, "0");
+        const ms = String(d.getMilliseconds()).padStart(3, "0");
+        return `${h}:${m}:${s}.${ms}`;
+      }
+
+      const tsEls = document.querySelectorAll("[data-ts]");
+      function updateTimestamps() {
+        tsEls.forEach((el) => {
+          const offset = parseInt(el.dataset.ts, 10);
+          el.textContent = liveTime(offset);
+        });
+      }
+      updateTimestamps();
+      setInterval(updateTimestamps, 200);
+
+      // ─── Hero Scramble / Unscramble Text Animation ──────────────────────────────
+      (function () {
+        const el = document.getElementById("scramble-target");
+        if (!el) return;
+
+        const phrases = [
+          "entire web.",
+          "competition.",
+          "raw data.",
+          "market alpha.",
+          "unscrapable.",
+        ];
+        const chars =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*<>{}[]";
+        let phraseIndex = 0;
+        const PAUSE_MS = 2800; // time to hold the resolved word
+        const SCRAMBLE_MS = 60; // interval between scramble ticks
+        const RESOLVE_AFTER = 3; // how many ticks before each char locks in
+
+        function scrambleTo(target, callback) {
+          const len = target.length;
+          let iteration = 0;
+          const maxIterations = len * RESOLVE_AFTER;
+
+          const interval = setInterval(() => {
+            // Build the displayed string: resolved chars + scrambled remainder
+            const resolved = Math.floor(iteration / RESOLVE_AFTER);
+            let display = "";
+            for (let i = 0; i < len; i++) {
+              if (i < resolved) {
+                display += target[i];
+              } else if (target[i] === " ") {
+                display += " ";
+              } else {
+                display += chars[Math.floor(Math.random() * chars.length)];
+              }
+            }
+            el.textContent = display;
+            iteration++;
+
+            if (iteration > maxIterations) {
+              clearInterval(interval);
+              el.textContent = target;
+              if (callback) callback();
+            }
+          }, SCRAMBLE_MS);
+        }
+
+        function cycle() {
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          // Brief scramble-out of current text before resolving next
+          const next = phrases[phraseIndex];
+          scrambleTo(next, () => {
+            setTimeout(cycle, PAUSE_MS);
+          });
+        }
+
+        // Kick off after initial pause
+        setTimeout(cycle, PAUSE_MS);
+      })();
+    </script>
+  </body>
+</html>

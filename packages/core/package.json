@@ -1,0 +1,52 @@
+{
+  "name": "@scrapest/core",
+  "version": "1.0.0",
+  "main": "./app/index.ts",
+  "types": "./app/index.ts",
+  "dependencies": {
+    "@scrapest/config": "workspace:*",
+    "@scrapest/constants": "workspace:*",
+    "@scrapest/axios": "workspace:*",
+    "linkedom": "^0.18.12",
+    "otpauth": "^9.4.1",
+    "node-telegram-bot-api": "^0.67.0"
+  },
+  "exports": {
+    ".": {
+      "bun": "./app/index.ts",
+      "import": "./app/index.ts",
+      "default": "./app/index.ts"
+    },
+    "./utils": {
+      "bun": "./utils/index.ts",
+      "import": "./utils/index.ts",
+      "default": "./utils/index.ts"
+    },
+    "./lib": {
+      "bun": "./lib/tweet.ts",
+      "import": "./lib/tweet.ts",
+      "default": "./lib/tweet.ts"
+    },
+    "./resolvers": {
+      "bun": "./lib/resolvers/index.ts",
+      "import": "./lib/resolvers/index.ts",
+      "default": "./lib/resolvers/index.ts"
+    },
+    "./utils/encrypt-decrypt": {
+      "bun": "./utils/encrypt-decrypt.ts",
+      "import": "./utils/encrypt-decrypt.ts",
+      "default": "./utils/encrypt-decrypt.ts"
+    },
+    "./utils/console": {
+      "bun": "./utils/console.ts",
+      "import": "./utils/console.ts",
+      "default": "./utils/console.ts"
+    },
+    "./oauth1": {
+      "bun": "./oauth1.ts",
+      "import": "./oauth1.ts",
+      "default": "./oauth1.ts"
+    },
+    "./package.json": "./package.json"
+  }
+}

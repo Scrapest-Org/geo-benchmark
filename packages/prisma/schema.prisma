@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TrackedSource {
+  DISCORD
+  TELEGRAM
+  X
+}
+
+enum WebhookStatus {
+  ACTIVE
+  FAILED
+  DISABLED
+}
+
+model User {
+  id                  String        @id @default(cuid())
+  telegramId          String        @unique
+  name                String
+  username            String?
+  photoUrl            String?
+  lastAuthenticatedAt DateTime
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  apiKeys             ApiKey[]
+  sessions            AuthSession[]
+}
+
+model AuthSession {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String   @unique
+  expiresAt    DateTime
+  lastSeenAt   DateTime
+  createdAt    DateTime @default(now())
+  ip           String?
+  location     String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model ApiKey {
+  id             String                 @id @default(cuid())
+  userId         String
+  name           String
+  key            String                 @unique
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  webhooks       Webhook[]
+  sourceMappings TrackedSourceMapping[]
+}
+
+model Webhook {
+  id        String        @id @default(cuid())
+  name      String
+  url       String
+  status    WebhookStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  apiKey     String
+  apiKeyData ApiKey @relation(fields: [apiKey], references: [key], onDelete: Cascade)
+
+  @@index([apiKey])
+}
+
+model SourceInfo {
+  id         String        @id @default(cuid())
+  source     TrackedSource
+  externalId String
+  username   String?
+  name       String?
+
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  trackedMappings TrackedSourceMapping[]
+  backfillDatas   BackfillData[]
+
+  @@unique([source, externalId])
+  @@index([source])
+}
+
+model TrackedSourceMapping {
+  id           String   @id @default(cuid())
+  sourceInfoId String
+  apiKey       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sourceInfo SourceInfo @relation(fields: [sourceInfoId], references: [id], onDelete: Cascade)
+  apiKeyData ApiKey     @relation(fields: [apiKey], references: [key], onDelete: Cascade)
+
+  @@unique([sourceInfoId, apiKey])
+  @@index([sourceInfoId])
+  @@index([apiKey])
+}
+
+model BackfillData {
+  id         String        @id @default(cuid())
+  source     TrackedSource
+  messageId  String
+  sourceId   String
+  content    String
+  rawPayload Json
+  createdAt  DateTime
+
+  sourceInfo SourceInfo @relation(fields: [source, sourceId], references: [source, externalId])
+
+  @@unique([source, messageId])
+  @@index([source, sourceId, createdAt])
+}
+
+model FcmDevice {
+  id                  String   @id @default(cuid())
+  // Account login (the @scrapest/core Account.login string). Not a Prisma FK
+  // because Account is stored in Redis, not Postgres.
+  accountLogin        String   @unique
+  androidId           String   // decimal i64 as string
+  securityToken       String   // decimal i64 as string
+  buildFingerprint    String
+  fcmToken            String
+  fcmKeyPrivate       Bytes?   // for E2E decrypt (lazy, only set if observed)
+  fcmAuthSecret       Bytes?
+  oauthToken          String
+  oauthTokenSecret    String
+  twitterDeviceId     String?  // udid sent to /device/register
+  registeredAt        DateTime?
+  lastCheckinAt       DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([accountLogin])
+}

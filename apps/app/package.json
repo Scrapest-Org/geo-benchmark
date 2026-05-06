@@ -1,0 +1,30 @@
+{
+  "name": "@scrapest/app",
+  "version": "0.0.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot index.ts",
+    "start": "bun index.ts",
+    "clean": "rm config.json tweets.json"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.5.0",
+    "@scrapest/config": "workspace:*",
+    "@scrapest/constants": "workspace:*",
+    "@scrapest/core": "workspace:*",
+    "@scrapest/prisma": "workspace:*",
+    "body-parser": "^2.2.2",
+    "express": "^5.2.1",
+    "jose": "^6.1.2",
+    "node-telegram-bot-api": "^0.67.0",
+    "p-limit": "^7.3.0",
+    "pg": "^8.16.3",
+    "valibot": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node-telegram-bot-api": "^0.64.13",
+    "@types/body-parser": "^1.19.6",
+    "@types/express": "^5.0.6"
+  }
+}

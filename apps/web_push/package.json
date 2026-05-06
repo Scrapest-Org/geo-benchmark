@@ -1,0 +1,23 @@
+{
+  "name": "@scrapest/web-push",
+  "version": "0.0.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/main.ts",
+    "start": "bun src/main.ts",
+    "build": "bun build ./src/main.ts --outdir ./dst --target node --format esm --minify",
+    "clean": "rm config.json tweets.json"
+  },
+  "dependencies": {
+    "@scrapest/config": "workspace:*",
+    "@scrapest/constants": "workspace:*",
+    "@scrapest/core": "workspace:*",
+    "https-proxy-agent": "^7.0.6",
+    "lru-cache": "^11.3.5",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  }
+}

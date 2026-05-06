@@ -1,0 +1,25 @@
+{
+  "name": "@scrapest/prisma",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "validate": "prisma validate"
+  },
+  "dependencies": {
+    "@prisma/client": "7.5.0"
+  },
+  "devDependencies": {
+    "prisma": "7.5.0"
+  },
+  "exports": {
+    ".": {
+      "bun": "./index.ts",
+      "import": "./index.ts",
+      "default": "./index.ts"
+    },
+    "./package.json": "./package.json"
+  }
+}

@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+    ports:
+      - "6969:6969"
+    env_file:
+      - .env
+      - ./apps/app/.env
+    environment:
+      - TCP_RPC_TELEGRAM_HOST=telegram
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  txid:
+    build:
+      context: .
+      dockerfile: docker/txid.Dockerfile
+    ports:
+      - "7055:7055"
+    env_file:
+      - .env
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  web-push:
+    build:
+      context: .
+      dockerfile: docker/web_push.Dockerfile
+    env_file:
+      - .env
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
