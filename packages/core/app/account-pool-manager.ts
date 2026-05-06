@@ -27,7 +27,7 @@ type AccountOpts = {
   skipValidation?: boolean;
 };
 
-type Conveyor = "conveyor" | "conveyor2" | "conveyor3";
+type Conveyor = "conveyor" | "conveyor2" | "conveyor3" | "conveyor4";
 const fetch = bunFetch({ maxRetries: 3, timeout: 5_000 });
 
 class AccountPoolManager {
