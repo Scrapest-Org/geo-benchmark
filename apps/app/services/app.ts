@@ -1,4 +1,4 @@
-import { type Config, redis, opts } from "@scrapest/config";
+import { type Config, redis, opts, getEnv } from "@scrapest/config";
 import { KEYS } from "@scrapest/constants";
 import { GuestTokenManager, X, XGraphQL, XGraphQLSearch } from "@scrapest/core";
 import { webpushQueue } from "../utils/queues";
@@ -9,11 +9,11 @@ export class AppService {
   private gtm!: GuestTokenManager;
   public gql!: XGraphQL;
   private search!: XGraphQLSearch;
-
-  private readonly shards = ["web-push-1", "web-push-2", "web-push-3"] as const;
+  private vm: string;
 
   constructor() {
     this.cookies = null;
+    this.vm = getEnv("VM_NAME");
   }
 
   async stop() {
@@ -32,20 +32,17 @@ export class AppService {
   private async getX() {
     if (this.cookies) return new X(this.cookies);
 
-    const keysToTry = [...this.shards.map((id) => `config:${id}`), "config"];
-    const configs = await redis.mget(keysToTry);
+    const raw = await redis.get(`config:${this.vm}`);
+    if (!raw) throw new Error(`No config found for ${this.vm}`);
 
-    for (const raw of configs) {
-      if (!raw) continue;
-      try {
-        const parsed = JSON.parse(raw) as Config["config"];
-        if (parsed.x?.cookies?.auth_token) {
-          this.cookies = parsed.x.cookies;
-          return new X(this.cookies);
-        }
-      } catch (e) {
-        continue;
+    try {
+      const parsed = JSON.parse(raw) as Config["config"];
+      if (parsed.x?.cookies?.auth_token) {
+        this.cookies = parsed.x.cookies;
+        return new X(this.cookies);
       }
+    } catch (e) {
+      throw new Error(`Failed to parse config for ${this.vm}: ${e}`);
     }
 
     throw new Error(
@@ -81,67 +78,39 @@ export class AppService {
   }
 
   public async enqueueFollow(id: string, username: string) {
-    await Promise.all(
-      this.shards.map((shardId) =>
-        webpushQueue.add(
-          "follow-user",
-          {
-            id,
-            username,
-            targetInstance: shardId,
-          },
-          opts,
-        ),
-      ),
+    await webpushQueue.add(
+      "follow-user",
+      {
+        id,
+        username,
+        targetInstance: this.vm,
+      },
+      opts,
     );
   }
 
   public async enqueueUnfollow(id: string, username: string) {
-    await Promise.all(
-      this.shards.map((shardId) =>
-        webpushQueue.add(
-          "unfollow-user",
-          {
-            id,
-            username,
-            targetInstance: shardId,
-          },
-          opts,
-        ),
-      ),
+    await webpushQueue.add(
+      "unfollow-user",
+      {
+        id,
+        username,
+        targetInstance: this.vm,
+      },
+      opts,
     );
   }
 
-  private async getKeys(suffix: string = "") {
-    const key = "health:" + suffix;
-    const healthKeys = [];
-    let cursor = "0";
-
-    do {
-      const result = await redis.scan(
-        cursor,
-        "MATCH",
-        `${key}*`,
-        "COUNT",
-        2000,
-      );
-      cursor = result[0];
-      healthKeys.push(...result[1]);
-    } while (cursor !== "0");
-
-    return healthKeys;
-  }
-
   private async getAllFleetHealth() {
-    const healthKeys = await this.getKeys();
-    if (!healthKeys.length) return { shards: [], activeCount: 0 };
-
-    const healthData = await redis.mget(healthKeys);
-    const shards = [];
+    const healthData = await redis.get(`health:${this.vm}`);
 
     let activeCount = 0;
-    for (let i = 0; i < healthKeys.length; i++) {
-      const healthDataItem = healthData[i];
+    if (!healthData) return { shards: [], activeCount: 0 };
+
+    const shards: Array<WebPushHealth | WebPollHealth | null> =
+      JSON.parse(healthData);
+    for (let i = 0; i < shards.length; i++) {
+      const healthDataItem = shards[i];
       if (!healthDataItem) continue;
 
       try {
@@ -166,7 +135,7 @@ export class AppService {
   }
 
   public async dispatchHealth() {
-    const stats = await redis.hgetall(KEYS.STATS_KEY);
+    const stats = await redis.hgetall(`KEYS.STATS_KEY:${this.vm}`);
 
     const success = parseInt(stats.total_sent || "0");
     const failure = parseInt(stats.total_failed || "0");
@@ -211,14 +180,10 @@ export class AppService {
   }
 
   public async healthStatus() {
-    const [xKeys, [discordKey]] = await Promise.all([
-      this.getKeys("web"),
-      this.getKeys("discord"),
-    ]);
+    const xKeys = this.getKeys("web");
 
-    const [xRaw, discord, total_sent] = await Promise.all([
+    const [xRaw, total_sent] = await Promise.all([
       redis.mget(xKeys),
-      discordKey ? redis.get(discordKey) : null,
       redis.hget("dispatch:stats", "total_sent"),
     ]);
 

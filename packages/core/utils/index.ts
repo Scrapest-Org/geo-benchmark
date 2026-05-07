@@ -4,4 +4,3 @@ function randomJitter(base: number, spread: number) {
 }
 
 export { randomJitter };
-export { alert } from "./alert";

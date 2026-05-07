@@ -7,7 +7,6 @@ services:
       - "6969:6969"
     env_file:
       - .env
-      - ./apps/app/.env
     restart: always
     logging:
       driver: "json-file"
@@ -36,7 +35,6 @@ services:
       dockerfile: docker/web_push.Dockerfile
     env_file:
       - .env
-      - ./apps/web_push/.env
     restart: always
     logging:
       driver: "json-file"
