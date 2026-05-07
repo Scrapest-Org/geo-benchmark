@@ -41,7 +41,6 @@ async function runWithAccount(retries = 0): Promise<void> {
       cookies: x!.cookies,
       targetInstance: vmName,
     });
-    await webpushQueue.add("sync-following", { targetInstance: vmName });
   } catch (e) {
     console.error(`X| Setup failed for ${acc.login}:`, e);
     await teardown(vmName);

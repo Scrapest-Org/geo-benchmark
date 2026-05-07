@@ -2,19 +2,6 @@ import { connection, opts, redis } from "@scrapest/config";
 import { LRUCache } from "lru-cache";
 import { Queue } from "bullmq";
 
-interface UserInfo {
-  name: string;
-  username: string;
-  id: string;
-}
-
-async function getAllUserInfo(): Promise<UserInfo[]> {
-  const res = await fetch("http://app:6969/internal/sources");
-  const sources = await res.json();
-
-  return sources as UserInfo[];
-}
-
 class UserCache {
   private cache = new LRUCache<string, string>({
     max: 50_000, // adjust for RAM
@@ -78,5 +65,4 @@ const webpushQueue = new Queue("webpush", {
 const tweetQueue = new Queue("tweet", { connection, defaultJobOptions: opts });
 const appQueue = new Queue("app", { connection, defaultJobOptions: opts });
 
-export { getAllUserInfo, userCache, webpushQueue, tweetQueue, appQueue };
-export type { UserInfo };
+export { userCache, webpushQueue, tweetQueue, appQueue };

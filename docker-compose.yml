@@ -36,7 +36,7 @@ services:
       dockerfile: docker/web_push.Dockerfile
     env_file:
       - .env
-      - ./apps/app/.env
+      - ./apps/web_push/.env
     restart: always
     logging:
       driver: "json-file"

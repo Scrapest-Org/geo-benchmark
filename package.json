@@ -14,7 +14,9 @@
     "all": "concurrently \"bun run push\" \"bun run app\"",
     "test": "bun test",
     "format": "bun x prettier --write .",
-    "script": "bun run scripts/$1.ts"
+    "script": "bun run scripts/$1.ts",
+    "typecheck": "tsc --noEmit",
+    "typecheck:app": "tsc --noEmit -p tsconfig.app-check.json"
   },
   "trustedDependencies": [
     "sharp"
