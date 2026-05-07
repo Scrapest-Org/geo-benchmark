@@ -27,16 +27,9 @@ type AccountOpts = {
   skipValidation?: boolean;
 };
 
-type Conveyor = "conveyor" | "conveyor2" | "conveyor3" | "conveyor4";
 const fetch = bunFetch({ maxRetries: 3, timeout: 5_000 });
 
 class AccountPoolManager {
-  private conveyor: Conveyor;
-
-  constructor(conveyor: Conveyor) {
-    this.conveyor = conveyor;
-  }
-
   async getAccount(opts?: AccountOpts): Promise<Account> {
     const claimKey = opts?.claimKey;
     let login: string | null = null;
@@ -46,11 +39,11 @@ class AccountPoolManager {
     }
 
     if (!login) {
-      const poolSize = await redis.llen(this.conveyor);
+      const poolSize = await redis.llen("conveyor4");
       let attempts = 0;
 
       while (attempts < poolSize) {
-        login = await redis.rpoplpush(this.conveyor, this.conveyor);
+        login = await redis.rpoplpush("conveyor4", "conveyor4");
         if (!login) throw new Error("No accounts available in conveyor");
 
         if (claimKey) {
@@ -116,7 +109,7 @@ class AccountPoolManager {
   }
 
   async getRawAccount() {
-    const login = await redis.rpoplpush(this.conveyor, this.conveyor);
+    const login = await redis.rpoplpush("conveyor4", "conveyor4");
     const raw = await redis.hget("warehouse", login);
     if (!raw) throw new Error(`Account warehouse for ${login} is empty`);
 
@@ -191,9 +184,9 @@ class AccountPoolManager {
           const badLogin = loginMatch[1];
 
           console.warn(
-            `🗑️| Offloading ${badLogin} from ${this.conveyor} to failed_conveyor.`,
+            `🗑️| Offloading ${badLogin} from ${"conveyor4"} to failed_conveyor.`,
           );
-          // await redis.pipeline().lrem(this.conveyor, 0, badLogin).sadd("failed_conveyor", badLogin).exec();
+          // await redis.pipeline().lrem("conveyor4", 0, badLogin).sadd("failed_conveyor", badLogin).exec();
         }
       }
 
