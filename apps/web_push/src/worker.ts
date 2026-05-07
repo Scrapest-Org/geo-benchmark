@@ -144,12 +144,12 @@ function buildWorkers(gql: XGraphQL, xRef: XRef, iid: string) {
   const syncFollowing = createSyncFollowing(gql, xRef, iid);
 
   const postWorker = new Worker(
-    "tweet", // Keeping queue name as 'tweet' for backward compatibility
+    "tweet",
     async (job: Job<any, any, "new-tweet">) => {
       const { tag, rcv } = job.data;
 
       const t = await gql.fetchXPost(tag);
-      const se = new SourceEvent("x", t, rcv);
+      const se = new SourceEvent("x", t, iid, rcv);
 
       await appQueue.add(
         "dispatch-events",

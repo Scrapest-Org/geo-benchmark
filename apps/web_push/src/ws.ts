@@ -41,6 +41,7 @@ class WS {
     remote_settings__monitor_changes = "",
     endpoint = "",
     channelID = "",
+    public vmName = "",
   ) {
     this.decrypt = decrypt;
     this.uaid = uaid;
@@ -311,7 +312,7 @@ class WS {
         url: `https://x.com${tweetData.data.uri}`,
         lang: tweetData.lang,
       };
-      const tweetEvent = new SourceEvent("fast-x", tweet, sft);
+      const tweetEvent = new SourceEvent("fast-x", tweet, this.vmName, sft);
 
       await appQueue.add(
         "dispatch-events",

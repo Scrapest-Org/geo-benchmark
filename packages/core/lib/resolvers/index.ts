@@ -1,34 +1,30 @@
-import { type Message } from "discord.js";
-import { Api } from "telegram";
-
-type SourceType = "x" | "discord" | "telegram";
+type SourceType = "x";
 type ExtendedSourceType = SourceType | "fast-x";
 
-type TelegramMessage = Api.Message & {
-  channelId: string;
-};
-
-type PayloadType =
-  | ResolvedXPost
-  | Message
-  | XPostNotification
-  | TelegramMessage;
+type PayloadType = ResolvedXPost | XPostNotification;
 
 class SourceEvent {
   mid: string | number;
   sid: string | number;
   source: ExtendedSourceType;
+  vmName: string;
 
   timestamp: number;
   payload: PayloadType;
 
-  constructor(src: ExtendedSourceType, payload: PayloadType, rcv?: number) {
+  constructor(
+    src: ExtendedSourceType,
+    payload: PayloadType,
+    vmName: string,
+    rcv?: number,
+  ) {
     this.source = src;
     this.mid = payload.id;
-    this.sid = "lang" in payload ? payload.author.id : payload.channelId;
+    this.sid = payload.author.id;
 
     this.timestamp = rcv ?? Date.now();
     this.payload = payload;
+    this.vmName = vmName;
   }
 }
 

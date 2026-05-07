@@ -22,6 +22,8 @@ export class InternalService {
 
     return webhooks.map((url) =>
       this.limit(async () => {
+        const statsKey = `${KEYS.STATS_KEY}:${data.vmName}`;
+
         try {
           if (!url) return;
           const res = await fetch(url, {
@@ -33,13 +35,13 @@ export class InternalService {
 
           if (!res.ok) {
             console.warn(`❌| Webhook [${res.status}] for ${url}`);
-            await redis.hincrby(KEYS.STATS_KEY, "total_failed", 1);
+            await redis.hincrby(statsKey, "total_failed", 1);
           } else {
-            await redis.hincrby(KEYS.STATS_KEY, "total_sent", 1);
+            await redis.hincrby(statsKey, "total_sent", 1);
           }
         } catch (e) {
           console.warn(`⚠️| Network error - ${url}: ${(e as Error).message}`);
-          await redis.hincrby(KEYS.STATS_KEY, "total_failed", 1);
+          await redis.hincrby(statsKey, "total_failed", 1);
         }
       }),
     );
@@ -55,7 +57,7 @@ export class InternalService {
     const cutoff = dispatchEnd - 86400000;
     const member = (latency: number) => `${latency}:${event.mid}`;
 
-    const perSource = sourceMetricKeys(event.source);
+    const perSource = sourceMetricKeys(event.source, event.vmName);
 
     await redis
       .pipeline()
@@ -76,7 +78,8 @@ export class InternalService {
     const receivedAt = Date.now();
     const results = await Promise.all(
       events.map(async (event) => {
-        const DUP_KEY = `dup:${event.source}_${event.mid}_${event.sid}`;
+        const vmSource = `${event.source}_${event.vmName}`;
+        const DUP_KEY = `dup:${vmSource}_${event.mid}_${event.sid}`;
         const isNew = await redis.set(DUP_KEY, "1", "EX", 1800, "NX");
         return isNew ? event : null;
       }),
@@ -92,13 +95,29 @@ export class InternalService {
     const allWebhookTasks = nestedWebhookTasks.flat();
 
     try {
+      const statsByVm = freshEvents.reduce(
+        (acc, e) => {
+          const vm = e.vmName || "";
+          acc[vm] = (acc[vm] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      const statPromises = Object.entries(statsByVm).flatMap(([vm, count]) => {
+        const statsKey = vm ? `${KEYS.STATS_KEY}:${vm}` : KEYS.STATS_KEY;
+        return [
+          redis.hincrby(statsKey, "events_received", count),
+          redis.hincrby(statsKey, "batches_completed", 1),
+        ];
+      });
+
       await Promise.all([
         ...allWebhookTasks,
         ...freshEvents.map((e) =>
           this.recordMetrics(e, receivedAt, dispatchEnd),
         ),
-        redis.hincrby(KEYS.STATS_KEY, "events_received", freshEvents.length),
-        redis.hincrby(KEYS.STATS_KEY, "batches_completed", 1),
+        ...statPromises,
       ]);
     } catch (e) {
       console.error("Worker background task failed:", (e as Error).message);

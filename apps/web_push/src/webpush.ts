@@ -64,6 +64,7 @@ async function setup(acc: Account, instanceId: string) {
     ap.remote_settings__monitor_changes,
     ap.endpoint,
     ap.channel_id,
+    instanceId,
   );
   ws.initWebsocket();
 

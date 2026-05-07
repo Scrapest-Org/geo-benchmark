@@ -1,18 +1,4 @@
-import {
-  check,
-  maxLength,
-  maxValue,
-  minLength,
-  minValue,
-  number,
-  object,
-  optional,
-  picklist,
-  pipe,
-  regex,
-  string,
-  url,
-} from "valibot";
+import { maxLength, minLength, pipe, regex, string } from "valibot";
 
 const XUsernameSchema = pipe(
   string("Username must be a string"),

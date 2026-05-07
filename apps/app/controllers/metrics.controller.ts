@@ -4,7 +4,6 @@ import type { AppService } from "../services/app";
 import { redis } from "@scrapest/config";
 import { KEYS, sourceMetricKeys } from "@scrapest/constants";
 import { parse } from "valibot";
-import { ExtendedSourceTypeSchema } from "../utils/valibot";
 
 const parseLatencies = (raw: string[]) =>
   raw.map((m) => parseInt(m.split(":")[0] ?? "0", 10)).sort((a, b) => a - b);
@@ -65,11 +64,12 @@ export class MetricsController {
 
   public metricsBySource = async (req: Request, res: Response) => {
     try {
-      const source = parse(ExtendedSourceTypeSchema, req.params.source);
+      const source = req.params.source as string;
+      const vm = req.params.vm as string;
 
       const windowMs = 24 * 60 * 60 * 1000;
       const since = Date.now() - windowMs;
-      const keys = sourceMetricKeys(source);
+      const keys = sourceMetricKeys(source, vm);
 
       const [sourceRaw, internalRaw] = await Promise.all([
         redis.zrangebyscore(keys.sourceLatency, since, "+inf"),

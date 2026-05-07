@@ -1,11 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { getEnv, redis } from "@scrapest/config";
 import { KEYS } from "@scrapest/constants";
-import { parseCookies } from "../utils/http";
-import { SessionService, SESSION_COOKIE_NAME } from "../services/session";
 
 const adminKey = getEnv("ADMIN_API_KEY");
-const sessionService = new SessionService();
 
 export async function requireApiKey(
   req: Request,
@@ -104,49 +101,4 @@ export function requireAdminKey(
   }
 
   next();
-}
-
-export async function requireSession(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const cookies = parseCookies(req.headers.cookie);
-    const sessionToken = cookies[SESSION_COOKIE_NAME];
-
-    if (!sessionToken) {
-      sessionService.clearSessionCookie(res);
-      return res.status(401).json({
-        status: "error",
-        error: "Authentication required.",
-      });
-    }
-
-    const session = await sessionService.getSession(sessionToken);
-
-    if (!session) {
-      sessionService.clearSessionCookie(res);
-      return res.status(401).json({
-        status: "error",
-        error: "Session expired.",
-      });
-    }
-
-    req.session = session;
-    req.user = session.user;
-    sessionService.writeSessionCookie(
-      res,
-      session.sessionToken,
-      session.expiresAt,
-    );
-
-    next();
-  } catch (error) {
-    console.error("Session middleware error:", error);
-    return res.status(500).json({
-      status: "error",
-      error: "Internal session error.",
-    });
-  }
 }

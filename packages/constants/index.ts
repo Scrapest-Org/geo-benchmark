@@ -58,8 +58,7 @@ const android_build_fingerprints = [
   },
 ] as const;
 
-type AndroidBuildFingerprint =
-  (typeof android_build_fingerprints)[number];
+type AndroidBuildFingerprint = (typeof android_build_fingerprints)[number];
 
 const VAPID =
   "BF5oEo0xDUpgylKDTlsd8pZmxQA1leYINiY-rSscWYK_3tWAkz4VMbtf1MLE_Yyd6iII6o-e3Q9TCN5vZMzVMEs";
@@ -91,9 +90,9 @@ enum KEYS {
   METRICS_INTERNAL_LATENCY = "metrics:latency:internal",
 }
 
-const sourceMetricKeys = (source: string) => ({
-  sourceLatency: `${KEYS.METRICS_SOURCE_LATENCY}:${source}` as const,
-  internalLatency: `${KEYS.METRICS_INTERNAL_LATENCY}:${source}` as const,
+const sourceMetricKeys = (source: string, vm: string) => ({
+  sourceLatency: `${KEYS.METRICS_SOURCE_LATENCY}:${source}:${vm}` as const,
+  internalLatency: `${KEYS.METRICS_INTERNAL_LATENCY}:${source}:${vm}` as const,
 });
 
 export {
