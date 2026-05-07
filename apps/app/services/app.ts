@@ -107,35 +107,26 @@ export class AppService {
     let activeCount = 0;
     if (!healthData) return { shards: [], activeCount: 0 };
 
-    const shards: Array<WebPushHealth | WebPollHealth | null> =
-      JSON.parse(healthData);
-    for (let i = 0; i < shards.length; i++) {
-      const healthDataItem = shards[i];
-      if (!healthDataItem) continue;
+    const shards: Array<any> = [];
+    try {
+      const health = JSON.parse(healthData);
+      const isActive = health && !(health.status as string).startsWith("error");
 
-      try {
-        const health = JSON.parse(healthDataItem);
-        const isActive =
-          health && !(health.status as string).startsWith("error");
+      if (isActive) activeCount++;
 
-        if (isActive) activeCount++;
-
-        const shardData: any = {
-          id: `shard-${i + 1}`,
-          status: health?.status || "offline",
-        };
-
-        shards.push(shardData);
-      } catch (e) {
-        continue;
-      }
+      shards.push({
+        id: this.vm,
+        status: health?.status || "offline",
+      });
+    } catch (e) {
+      // Ignore parse errors
     }
 
     return { shards, activeCount };
   }
 
   public async dispatchHealth() {
-    const stats = await redis.hgetall(`KEYS.STATS_KEY:${this.vm}`);
+    const stats = await redis.hgetall(`${KEYS.STATS_KEY}:${this.vm}`);
 
     const success = parseInt(stats.total_sent || "0");
     const failure = parseInt(stats.total_failed || "0");
@@ -180,36 +171,19 @@ export class AppService {
   }
 
   public async healthStatus() {
-    const xKeys = this.getKeys("web");
-
     const [xRaw, total_sent] = await Promise.all([
-      redis.mget(xKeys),
-      redis.hget("dispatch:stats", "total_sent"),
+      redis.get(`health:${this.vm}`),
+      redis.hget(`${KEYS.STATS_KEY}:${this.vm}`, "total_sent"),
     ]);
 
-    const xHealths: Array<WebPushHealth | WebPollHealth | null> = xRaw.map(
-      (raw) => (raw ? JSON.parse(raw) : null),
-    );
-    const statuses = xHealths
-      .filter((h): h is WebPushHealth | WebPollHealth => h !== null)
-      .map((h) => h.status);
-
-    const priority = { error: 3, initializing: 2, syncing: 1, indexing: 0 };
-    const xStatus = statuses.reduce(
-      (worst, current) =>
-        priority[current as keyof typeof priority] >
-        priority[worst as keyof typeof priority]
-          ? current
-          : worst,
-      "indexing",
-    );
+    const xHealth: WebPushHealth | null = xRaw ? JSON.parse(xRaw) : null;
 
     return {
-      x: xStatus,
+      x: xHealth?.status || "offline",
       discord: "offline",
       telegram: "offline",
       reddit: "coming soon",
-      total_sent: Number(total_sent),
+      total_sent: Number(total_sent || 0),
     };
   }
 
