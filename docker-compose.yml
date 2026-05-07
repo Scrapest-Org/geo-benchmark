@@ -8,8 +8,6 @@ services:
     env_file:
       - .env
       - ./apps/app/.env
-    environment:
-      - TCP_RPC_TELEGRAM_HOST=telegram
     restart: always
     logging:
       driver: "json-file"
@@ -38,6 +36,7 @@ services:
       dockerfile: docker/web_push.Dockerfile
     env_file:
       - .env
+      - ./apps/app/.env
     restart: always
     logging:
       driver: "json-file"
