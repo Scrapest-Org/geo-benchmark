@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { router, app as appService } from "./routes";
-import { bot, BOT_TOKEN } from "./bot";
 import { SocketRegistry, SSERegistry, type Socket } from "./services/ws";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
@@ -11,13 +10,10 @@ import { redis } from "@scrapest/config";
 import { KEYS, APP_URL } from "@scrapest/constants";
 import "@scrapest/core/utils/console";
 import { closeQueues } from "./utils/queues";
-import { closePrisma } from "./services/prisma";
-import { DASHBOARD_URL } from "./services/telegram-auth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const allowedOrigins = new Set([
-  DASHBOARD_URL,
   APP_URL,
   "http://127.0.0.1:5500",
   "http://localhost:5500",
@@ -58,11 +54,6 @@ app.use("/", router);
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "scrapest.html"));
-});
-
-app.post(`/bot/${BOT_TOKEN}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
 });
 
 const server = createServer(app);
@@ -149,14 +140,12 @@ async function shutdown(signal: string) {
 
   try {
     await appService.stop();
-    tg_client.destroy();
     console.log(`Closing ${wss.clients.size} active WebSockets...`);
     for (const client of wss.clients) {
       client.terminate();
     }
     await closeQueues();
     await redis.quit();
-    await closePrisma();
 
     server.close(() => {
       console.log("Server stopped");
