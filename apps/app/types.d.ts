@@ -1,5 +1,3 @@
-import type { AuthSession, User } from "@scrapest/prisma";
-
 type Statuses = "initializing" | "syncing" | "error" | "indexing";
 declare global {
   type WebPushHealth = {
@@ -34,8 +32,6 @@ declare global {
       sse?: {
         apiKey?: string;
       };
-      session?: AuthSession & { user: User };
-      user?: User;
     }
   }
 }

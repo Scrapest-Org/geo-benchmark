@@ -7,8 +7,6 @@
     "packages/constants/**/*.ts",
     "packages/core/**/*.ts",
     "packages/core/**/*.d.ts",
-    "packages/prisma/**/*.ts",
-    "prisma.config.ts"
   ],
   "exclude": [
     "apps/dashboard/**",

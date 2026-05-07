@@ -22,7 +22,6 @@
       "@scrapest/core/*": ["packages/core/*"],
       "@scrapest/fcm-client": ["packages/fcm-client/src/index.ts"],
       "@scrapest/fcm-client/*": ["packages/fcm-client/src/*"],
-      "@scrapest/prisma": ["packages/prisma/index.ts"],
       "@scrapest/axios": ["packages/axios/index.ts"],
       "@scrapest/axios/*": ["packages/axios/*"],
       "@scrapest/tcp-rpc": ["packages/tcp-rpc/index.ts"],

@@ -14,8 +14,6 @@
     "all": "concurrently \"bun run push\" \"bun run app\"",
     "test": "bun test",
     "format": "bun x prettier --write .",
-    "generate": "prisma generate",
-    "migrate": "prisma migrate dev",
     "script": "bun run scripts/$1.ts"
   },
   "trustedDependencies": [
