@@ -204,13 +204,9 @@ export class AppService {
       "indexing",
     );
 
-    const discordHealth: DiscordHealth | null = discord
-      ? JSON.parse(discord)
-      : null;
-
     return {
       x: xStatus,
-      discord: discordHealth?.status ?? "offline",
+      discord: "offline",
       telegram: "offline",
       reddit: "coming soon",
       total_sent: Number(total_sent),
