@@ -61,15 +61,7 @@ export class SocketRegistry {
         if (isFastX && !socket.data.useFastX) continue;
         if (isFullX && socket.data.ignoreFullPayload) continue;
 
-        socket.send(message, async (e) => {
-          if (e) {
-            console.warn(`❌| Failed to send to ${authKey}: ${e.message}`);
-            await redis.hincrby(KEYS.STATS_KEY, "total_failed", 1);
-            this.remove(socket);
-          } else {
-            await redis.hincrby(KEYS.STATS_KEY, "total_sent", 1);
-          }
-        });
+        socket.send(message);
       }
     }
   }

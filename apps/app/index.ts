@@ -117,12 +117,12 @@ wss.on("connection", async (ws: Socket) => {
   });
 });
 
+await warmup();
 const PORT = process.env.PORT || 6969;
 server.listen(Number(PORT), "0.0.0.0", async () => {
   console.log(`🚀 Server listening on port ${PORT}`);
 
   try {
-    await warmup();
     await appService.initialize();
     SocketRegistry.stayAlive();
     SSERegistry.stayAlive();

@@ -1,5 +1,4 @@
 import { redis } from "@scrapest/config";
-import type { Redis } from "ioredis";
 
 const cache = new Map<string, Set<string>>();
 

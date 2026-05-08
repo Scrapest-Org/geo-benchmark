@@ -271,6 +271,7 @@ class WS {
         base64_to_buffer(base64url_to_base64(parsedData.data)),
       );
 
+      console.time("decrypt");
       const text = new TextDecoder().decode(decryptedData);
       const tweetData: XPostData = JSON.parse(text);
       if (!tweetData.tag) {
@@ -284,10 +285,10 @@ class WS {
           BigInt(1288834974657),
       );
 
-      // console.log(
-      //   "~|",
-      //   `post ${tag} >>${Number(tweetData.timestamp) - sft}ms>> autopush >>${now - Number(tweetData.timestamp)}ms>> client`,
-      // );
+      console.log(
+        "~|",
+        `post ${tag} >>${Number(tweetData.timestamp) - sft}ms>> autopush >>${now - Number(tweetData.timestamp)}ms>> client`,
+      );
 
       const ageMs = now - sft;
       if (ageMs > TIME._5MIN) {
@@ -316,6 +317,7 @@ class WS {
 
       const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
       tcpRpcServer.broadcast("dispatch-events", { payload: [tweetEvent] });
+      console.timeEnd("decrypt");
       internalEmitter.emit("new-tweet", { tag, rcv: sft });
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));
