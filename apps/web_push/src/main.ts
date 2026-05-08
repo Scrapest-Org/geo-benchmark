@@ -2,8 +2,9 @@ import { setup, teardown, x } from "./webpush";
 import { redis, getEnv } from "@scrapest/config";
 import { AccountPoolManager, X, type Account, TXID } from "@scrapest/core";
 import "@scrapest/core/utils/console";
-import { webpushQueue, tweetQueue } from "./helpers";
+import { webpushQueue } from "./helpers";
 import { GuestTokenManager, XGraphQL } from "@scrapest/core";
+import { tcpRpcServer } from "./rpc";
 import buildWorkers from "./worker";
 import { TIME } from "@scrapest/constants";
 
@@ -47,7 +48,7 @@ async function runWithAccount(retries = 0): Promise<void> {
   }
 }
 
-const { postWorker, mgmtWorker } = buildWorkers(gql, xRef);
+const { mgmtWorker } = buildWorkers(gql, xRef);
 async function main() {
   console.log("🚀 Starting Web Push Service...");
 
@@ -69,12 +70,11 @@ const cleanup = async () => {
 
   await Promise.all([
     teardown(vmName),
-    postWorker.close(),
     mgmtWorker.close(),
-    tweetQueue.close(),
     webpushQueue.close(),
   ]);
 
+  tcpRpcServer.stop();
   await redis.quit();
   gtm.stop();
 

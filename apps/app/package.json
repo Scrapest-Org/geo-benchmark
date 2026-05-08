@@ -12,6 +12,7 @@
     "@scrapest/config": "workspace:*",
     "@scrapest/constants": "workspace:*",
     "@scrapest/core": "workspace:*",
+    "@scrapest/tcp-rpc": "workspace:*",
     "body-parser": "^2.2.2",
     "express": "^5.2.1",
     "jose": "^6.1.2",

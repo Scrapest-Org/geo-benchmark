@@ -1,8 +1,9 @@
-import { Config, connection, getEnv, opts, redis } from "@scrapest/config";
+import { Config, connection, getEnv, redis } from "@scrapest/config";
 import { X, type XGraphQL } from "@scrapest/core";
 import SourceEvent from "@scrapest/core/resolvers";
 import { type Job, Worker } from "bullmq";
-import { appQueue, userCache } from "./helpers";
+import { userCache } from "./helpers";
+import { tcpRpcServer, internalEmitter } from "./rpc";
 
 interface XRef {
   current: X | null;
@@ -21,23 +22,12 @@ async function fetchXInstance() {
 type MgmtJobNames = "unfollow-user" | "follow-user" | "update-session";
 
 function buildWorkers(gql: XGraphQL, xRef: XRef) {
-  const postWorker = new Worker(
-    `${vm}-tweet`,
-    async (job: Job<any, any, "new-tweet">) => {
-      const { tag, rcv } = job.data;
-
-      const t = await gql.fetchXPost(tag);
-      const se = new SourceEvent("x", t, vm, rcv);
-
-      await appQueue.add(
-        "dispatch-events",
-        { payload: [se] },
-        { ...opts, attempts: 3 },
-      );
-      console.log(`[${vm}] Worker processed full post: ${tag}`);
-    },
-    { connection, concurrency: 3 },
-  );
+  internalEmitter.on("new-tweet", async ({ tag, rcv }: { tag: string; rcv: number }) => {
+    const t = await gql.fetchXPost(tag);
+    const se = new SourceEvent("x", t, vm, rcv);
+    tcpRpcServer.broadcast("dispatch-events", { payload: [se] });
+    console.log(`[${vm}] Processed full post: ${tag}`);
+  });
 
   const mgmtWorker = new Worker(
     `${vm}-webpush`,
@@ -79,7 +69,7 @@ function buildWorkers(gql: XGraphQL, xRef: XRef) {
     { connection },
   );
 
-  return { postWorker, mgmtWorker };
+  return { mgmtWorker };
 }
 
 export default buildWorkers;

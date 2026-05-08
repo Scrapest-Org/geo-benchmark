@@ -63,13 +63,5 @@ const webpushQueue = new Queue(`${vm}-webpush`, {
   connection,
   defaultJobOptions: opts,
 });
-const tweetQueue = new Queue(`${vm}-tweet`, {
-  connection,
-  defaultJobOptions: opts,
-});
-const appQueue = new Queue(`${vm}-app`, {
-  connection,
-  defaultJobOptions: opts,
-});
 
-export { userCache, webpushQueue, tweetQueue, appQueue };
+export { userCache, webpushQueue };

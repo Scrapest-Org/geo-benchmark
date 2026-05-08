@@ -13,6 +13,7 @@
     "@scrapest/config": "workspace:*",
     "@scrapest/constants": "workspace:*",
     "@scrapest/core": "workspace:*",
+    "@scrapest/tcp-rpc": "workspace:*",
     "https-proxy-agent": "^7.0.6",
     "lru-cache": "^11.3.5",
     "ws": "^8.19.0"

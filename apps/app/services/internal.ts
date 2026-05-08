@@ -76,26 +76,16 @@ export class InternalService {
 
   public async handleDispatch(events: SourceEvent[]) {
     const receivedAt = Date.now();
-    const results = await Promise.all(
-      events.map(async (event) => {
-        const vmSource = `${event.source}_${event.vmName}`;
-        const DUP_KEY = `dup:${vmSource}_${event.mid}_${event.sid}`;
-        const isNew = await redis.set(DUP_KEY, "1", "EX", 1800, "NX");
-        return isNew ? event : null;
-      }),
-    );
 
-    const freshEvents = results.filter(Boolean) as SourceEvent[];
-    if (freshEvents.length === 0) return;
     const nestedWebhookTasks = await Promise.all(
-      freshEvents.map((event) => this.broadcast(event)),
+      events.map((event) => this.broadcast(event)),
     );
 
     const dispatchEnd = Date.now();
     const allWebhookTasks = nestedWebhookTasks.flat();
 
     try {
-      const statsByVm = freshEvents.reduce(
+      const statsByVm = events.reduce(
         (acc, e) => {
           const vm = e.vmName || "";
           acc[vm] = (acc[vm] || 0) + 1;
@@ -114,9 +104,7 @@ export class InternalService {
 
       await Promise.all([
         ...allWebhookTasks,
-        ...freshEvents.map((e) =>
-          this.recordMetrics(e, receivedAt, dispatchEnd),
-        ),
+        ...events.map((e) => this.recordMetrics(e, receivedAt, dispatchEnd)),
         ...statPromises,
       ]);
     } catch (e) {

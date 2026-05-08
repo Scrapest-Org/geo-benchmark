@@ -9,9 +9,10 @@ import {
 } from "@scrapest/core/utils/encrypt-decrypt";
 import type { Decrypt } from "@scrapest/core";
 import { fireFoxUserAgent, TIME } from "@scrapest/constants";
-import { getEnv, opts, redis } from "@scrapest/config";
-import { appQueue, tweetQueue, userCache } from "./helpers";
+import { getEnv } from "@scrapest/config";
+import { userCache } from "./helpers";
 import SourceEvent from "@scrapest/core/resolvers";
+import { tcpRpcServer, internalEmitter } from "./rpc";
 
 type SendJSONPayload = {
   messageType: string;
@@ -314,16 +315,8 @@ class WS {
       };
 
       const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
-      await redis.publish(
-        "dispatch-events",
-        JSON.stringify({ payload: [tweetEvent] }),
-      );
-
-      await tweetQueue.add(
-        "new-tweet",
-        { tag, rcv: sft },
-        { ...opts, jobId: tag },
-      );
+      tcpRpcServer.broadcast("dispatch-events", { payload: [tweetEvent] });
+      internalEmitter.emit("new-tweet", { tag, rcv: sft });
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));
       console.error("Error decrypting notification:", e.message);
