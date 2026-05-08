@@ -1,31 +1,14 @@
-import { Worker, type Job } from "bullmq";
-import { connection, getEnv } from "@scrapest/config";
+import { redis } from "@scrapest/config";
 import { InternalService } from "../services/internal";
 
-type JobNames = "dispatch-events";
-const vm = getEnv("VM_NAME");
+const internal = new InternalService();
 
-export const appWorker = new Worker(
-  `${vm}-app`,
-  async (job: Job<any, any, JobNames>) => {
-    const internal = new InternalService();
-    const { name, data } = job;
-    switch (name) {
-      case "dispatch-events": {
-        const { payload } = data as { payload: any[] };
-        if (!payload || !payload.length) throw new Error("No payload provided");
+const sub = redis.duplicate();
+await sub.subscribe("dispatch-events");
 
-        await internal.handleDispatch(payload);
-        break;
-      }
-      default:
-        console.error(`Unknown job name: ${name}`);
-        break;
-    }
-  },
-  { connection, concurrency: 3 },
-);
+sub.on("message", async (_channel, message) => {
+  const { payload } = JSON.parse(message);
+  if (!payload || !payload.length) throw new Error("No payload provided");
 
-appWorker.on("failed", (job: Job | undefined, err: Error) => {
-  console.error(`App Job ${job?.id} failed: ${err.message}`);
+  await internal.handleDispatch(payload);
 });

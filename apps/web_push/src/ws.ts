@@ -9,7 +9,7 @@ import {
 } from "@scrapest/core/utils/encrypt-decrypt";
 import type { Decrypt } from "@scrapest/core";
 import { fireFoxUserAgent, TIME } from "@scrapest/constants";
-import { getEnv, opts } from "@scrapest/config";
+import { getEnv, opts, redis } from "@scrapest/config";
 import { appQueue, tweetQueue, userCache } from "./helpers";
 import SourceEvent from "@scrapest/core/resolvers";
 
@@ -312,13 +312,13 @@ class WS {
         url: `https://x.com${tweetData.data.uri}`,
         lang: tweetData.lang,
       };
-      const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
 
-      await appQueue.add(
+      const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
+      await redis.publish(
         "dispatch-events",
-        { payload: [tweetEvent] },
-        { ...opts, attempts: 3, jobId: tag },
+        JSON.stringify({ payload: [tweetEvent] }),
       );
+
       await tweetQueue.add(
         "new-tweet",
         { tag, rcv: sft },

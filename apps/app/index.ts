@@ -139,7 +139,7 @@ async function shutdown(signal: string) {
   }, 15000);
 
   try {
-    await appService.stop();
+    appService.stop();
     console.log(`Closing ${wss.clients.size} active WebSockets...`);
     for (const client of wss.clients) {
       client.terminate();

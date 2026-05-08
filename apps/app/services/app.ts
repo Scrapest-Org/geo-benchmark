@@ -2,7 +2,6 @@ import { type Config, redis, opts, getEnv } from "@scrapest/config";
 import { KEYS } from "@scrapest/constants";
 import { GuestTokenManager, X, XGraphQL, XGraphQLSearch } from "@scrapest/core";
 import { webpushQueue } from "../utils/queues";
-import { appWorker } from "../workers/app.worker";
 
 export class AppService {
   private cookies: XConfig["cookies"] | null;
@@ -16,8 +15,7 @@ export class AppService {
     this.vm = getEnv("VM_NAME");
   }
 
-  async stop() {
-    await appWorker.close();
+  stop() {
     this.gtm.stop();
   }
 

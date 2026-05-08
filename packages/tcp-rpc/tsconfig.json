@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@scrapest/tcp-rpc": ["./index.ts"],
+      "@scrapest/tcp-rpc/*": ["./*"]
+    }
+  },
+  "include": ["src/**/*", "index.ts"]
+}
