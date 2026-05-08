@@ -322,7 +322,7 @@ class WS {
       await tweetQueue.add(
         "new-tweet",
         { tag, rcv: sft },
-        { ...opts, jobId: `${tag}:${this.vmName}` },
+        { ...opts, jobId: `${tag}_${this.vmName}` },
       );
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));
