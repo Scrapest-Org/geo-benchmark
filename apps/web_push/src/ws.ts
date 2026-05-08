@@ -317,7 +317,7 @@ class WS {
       await appQueue.add(
         "dispatch-events",
         { payload: [tweetEvent] },
-        { ...opts, attempts: 3, jobId: `${tag}:${this.vmName}` },
+        { ...opts, attempts: 3, jobId: `${tag}_${this.vmName}` },
       );
       await tweetQueue.add(
         "new-tweet",
