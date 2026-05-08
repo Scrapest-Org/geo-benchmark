@@ -43,12 +43,20 @@ function buildWorkers(gql: XGraphQL, xRef: XRef, iid: string) {
       switch (job.name) {
         case "follow-user": {
           const { id, targetInstance, username } = job.data;
-          if (targetInstance !== iid) return;
+          if (targetInstance !== iid) {
+            console.log(
+              `[${iid}] Skipping follow-user job for ${targetInstance}`,
+            );
+            return;
+          }
 
-          const x = xRef.current ? xRef.current : await fetchXInstance(iid);
+          console.log(
+            `[${iid}] Following user ${username} (${id}) on ${targetInstance}`,
+          );
+          // const x = xRef.current ? xRef.current : await fetchXInstance(iid);
 
-          await x.followUser(id);
-          await x.turnOnNotifications(id);
+          // await x.followUser(id);
+          // await x.turnOnNotifications(id);
           await userCache.set(username, id);
           break;
         }

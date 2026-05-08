@@ -78,6 +78,14 @@ export class AppService {
   }
 
   public async enqueueFollow(id: string, username: string) {
+    console.log(
+      `[AppService] Enqueuing follow for ${username} (${id}) on ${this.vm}`,
+    );
+
+    const x = await this.getX();
+    await x.followUser(id);
+    await x.turnOnNotifications(id);
+
     await webpushQueue.add(
       "follow-user",
       {
