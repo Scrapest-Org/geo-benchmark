@@ -50,7 +50,7 @@ export class SocketRegistry {
 
   public static broadcast(targets: string[], payload: SourceEvent) {
     const isFastX = payload.source === "fast-x";
-    const shouldSkipFullXPayload = isFullXPayload(payload.source);
+    const isFullX = payload.source === "x";
     const message = JSON.stringify(payload);
 
     for (const authKey of targets) {
@@ -59,7 +59,7 @@ export class SocketRegistry {
 
       for (const socket of userSockets) {
         if (isFastX && !socket.data.useFastX) continue;
-        if (shouldSkipFullXPayload && socket.data.ignoreFullPayload) continue;
+        if (isFullX && socket.data.ignoreFullPayload) continue;
 
         socket.send(message, async (e) => {
           if (e) {

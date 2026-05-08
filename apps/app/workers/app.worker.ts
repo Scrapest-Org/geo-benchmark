@@ -1,8 +1,9 @@
 import { Worker, type Job } from "bullmq";
-import { connection } from "@scrapest/config";
+import { connection, getEnv } from "@scrapest/config";
 import { InternalService } from "../services/internal";
 
 type JobNames = "dispatch-events";
+const instance = getEnv("VM_NAME");
 
 export const appWorker = new Worker(
   "app",
@@ -11,7 +12,11 @@ export const appWorker = new Worker(
     const { name, data } = job;
     switch (name) {
       case "dispatch-events": {
-        const { payload } = data as { payload: any[] };
+        const { payload, targetInstance } = data as {
+          payload: any[];
+          targetInstance: string;
+        };
+        if (targetInstance && targetInstance !== instance) return;
         if (!payload) throw new Error("No payload provided");
 
         await internal.handleDispatch(payload);
