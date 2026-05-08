@@ -9,7 +9,7 @@ import {
 } from "@scrapest/core/utils/encrypt-decrypt";
 import type { Decrypt } from "@scrapest/core";
 import { fireFoxUserAgent, TIME } from "@scrapest/constants";
-import { opts } from "@scrapest/config";
+import { getEnv, opts } from "@scrapest/config";
 import { appQueue, tweetQueue, userCache } from "./helpers";
 import SourceEvent from "@scrapest/core/resolvers";
 
@@ -19,6 +19,7 @@ type SendJSONPayload = {
 };
 
 const STALE_WS = 1000 * 60 * 15.5;
+const vm = getEnv("VM_NAME");
 
 class WS {
   private _ws: WebSocket | null = null;
@@ -41,7 +42,6 @@ class WS {
     remote_settings__monitor_changes = "",
     endpoint = "",
     channelID = "",
-    public vmName = "",
   ) {
     this.decrypt = decrypt;
     this.uaid = uaid;
@@ -312,17 +312,17 @@ class WS {
         url: `https://x.com${tweetData.data.uri}`,
         lang: tweetData.lang,
       };
-      const tweetEvent = new SourceEvent("fast-x", tweet, this.vmName, sft);
+      const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
 
       await appQueue.add(
         "dispatch-events",
-        { payload: [tweetEvent], targetInstance: this.vmName },
-        { ...opts, attempts: 3, jobId: `${tag}_${this.vmName}` },
+        { payload: [tweetEvent] },
+        { ...opts, attempts: 3, jobId: tag },
       );
       await tweetQueue.add(
         "new-tweet",
         { tag, rcv: sft },
-        { ...opts, jobId: `${tag}_${this.vmName}` },
+        { ...opts, jobId: tag },
       );
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));

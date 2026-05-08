@@ -1,4 +1,4 @@
-import { connection, opts, redis } from "@scrapest/config";
+import { connection, getEnv, opts, redis } from "@scrapest/config";
 import { LRUCache } from "lru-cache";
 import { Queue } from "bullmq";
 
@@ -57,12 +57,19 @@ class UserCache {
 }
 
 const userCache = new UserCache();
+const vm = getEnv("VM_NAME");
 
-const webpushQueue = new Queue("webpush", {
+const webpushQueue = new Queue(`${vm}-webpush`, {
   connection,
   defaultJobOptions: opts,
 });
-const tweetQueue = new Queue("tweet", { connection, defaultJobOptions: opts });
-const appQueue = new Queue("app", { connection, defaultJobOptions: opts });
+const tweetQueue = new Queue(`${vm}-tweet`, {
+  connection,
+  defaultJobOptions: opts,
+});
+const appQueue = new Queue(`${vm}-app`, {
+  connection,
+  defaultJobOptions: opts,
+});
 
 export { userCache, webpushQueue, tweetQueue, appQueue };

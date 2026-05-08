@@ -91,7 +91,6 @@ export class AppService {
       {
         id,
         username,
-        targetInstance: this.vm,
       },
       opts,
     );
@@ -103,7 +102,6 @@ export class AppService {
       {
         id,
         username,
-        targetInstance: this.vm,
       },
       opts,
     );

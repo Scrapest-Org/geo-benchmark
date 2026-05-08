@@ -39,7 +39,6 @@ async function runWithAccount(retries = 0): Promise<void> {
     xRef.current = x;
     await webpushQueue.add("update-session", {
       cookies: x!.cookies,
-      targetInstance: vmName,
     });
   } catch (e) {
     console.error(`X| Setup failed for ${acc.login}:`, e);
@@ -48,7 +47,7 @@ async function runWithAccount(retries = 0): Promise<void> {
   }
 }
 
-const { postWorker, mgmtWorker } = buildWorkers(gql, xRef, vmName);
+const { postWorker, mgmtWorker } = buildWorkers(gql, xRef);
 async function main() {
   console.log("🚀 Starting Web Push Service...");
 

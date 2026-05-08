@@ -1,15 +1,17 @@
-import { connection, opts } from "@scrapest/config";
+import { connection, getEnv, opts } from "@scrapest/config";
 import { Queue } from "bullmq";
 
-export const xQueue = new Queue("x", {
+const vm = getEnv("VM_NAME");
+
+export const xQueue = new Queue(`${vm}-x`, {
   connection: connection,
   defaultJobOptions: opts,
 });
-export const appQueue = new Queue("app", {
+export const appQueue = new Queue(`${vm}-app`, {
   connection: connection,
   defaultJobOptions: opts,
 });
-export const webpushQueue = new Queue("webpush", {
+export const webpushQueue = new Queue(`${vm}-webpush`, {
   connection: connection,
   defaultJobOptions: opts,
 });
