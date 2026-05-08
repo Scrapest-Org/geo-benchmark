@@ -21,6 +21,7 @@
         "@scrapest/config": "workspace:*",
         "@scrapest/constants": "workspace:*",
         "@scrapest/core": "workspace:*",
+        "@scrapest/tcp-rpc": "workspace:*",
         "body-parser": "^2.2.2",
         "express": "^5.2.1",
         "jose": "^6.1.2",
@@ -42,6 +43,7 @@
         "@scrapest/config": "workspace:*",
         "@scrapest/constants": "workspace:*",
         "@scrapest/core": "workspace:*",
+        "@scrapest/tcp-rpc": "workspace:*",
         "https-proxy-agent": "^7.0.6",
         "lru-cache": "^11.3.5",
         "ws": "^8.19.0",
@@ -82,6 +84,10 @@
         "node-telegram-bot-api": "^0.67.0",
         "otpauth": "^9.4.1",
       },
+    },
+    "packages/tcp-rpc": {
+      "name": "@scrapest/tcp-rpc",
+      "version": "1.0.0",
     },
   },
   "packages": {
@@ -176,6 +182,8 @@
     "@scrapest/constants": ["@scrapest/constants@workspace:packages/constants"],
 
     "@scrapest/core": ["@scrapest/core@workspace:packages/core"],
+
+    "@scrapest/tcp-rpc": ["@scrapest/tcp-rpc@workspace:packages/tcp-rpc"],
 
     "@scrapest/web-push": ["@scrapest/web-push@workspace:apps/web_push"],
 
