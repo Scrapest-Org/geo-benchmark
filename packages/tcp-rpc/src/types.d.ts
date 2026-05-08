@@ -1,13 +1,21 @@
 interface RpcRequest {
+  type?: "request";
   id: string;
   method: string;
   params: unknown;
 }
 
 interface RpcResponse {
+  type?: "response";
   id: string;
   result?: unknown;
   error?: string;
+}
+
+interface RpcEvent {
+  type: "event";
+  event: string;
+  data?: unknown;
 }
 
 type RpcHandler<P = unknown, R = unknown> = (params: P) => Promise<R>;

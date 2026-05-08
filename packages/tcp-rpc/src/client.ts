@@ -14,6 +14,7 @@ export class TcpRpcClient {
   private reconnectAttempt = 0;
   private destroyed = false;
   private connectPromise: Promise<void> | null = null;
+  private listeners = new Map<string, Set<(data: unknown) => void>>();
 
   constructor(service: RpcServiceName);
   constructor(options: TcpRpcClientOptions);
@@ -53,7 +54,11 @@ export class TcpRpcClient {
           data(_socket, chunk) {
             const messages = self.decoder.feed(Buffer.from(chunk));
             for (const message of messages) {
-              self._handleResponse(message as RpcResponse);
+              if ("event" in message) {
+                self._dispatchEvent(message as RpcEvent);
+              } else {
+                self._handleResponse(message as RpcResponse);
+              }
             }
           },
 
@@ -78,6 +83,27 @@ export class TcpRpcClient {
         }
       });
     });
+  }
+
+  on(event: string, handler: (data: unknown) => void): this {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)!.add(handler);
+    return this;
+  }
+
+  off(event: string, handler: (data: unknown) => void): this {
+    this.listeners.get(event)?.delete(handler);
+    return this;
+  }
+
+  private _dispatchEvent(message: RpcEvent) {
+    const handlers = this.listeners.get(message.event);
+    if (!handlers) return;
+    for (const handler of handlers) {
+      handler(message.data);
+    }
   }
 
   private _handleResponse(response: RpcResponse) {

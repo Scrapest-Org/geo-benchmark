@@ -6,6 +6,7 @@ export class TcpRpcServer {
   private handlers = new Map<string, RpcHandler>();
   private options: Required<TcpRpcServerOptions>;
   private server: { stop: (force?: boolean) => void } | null = null;
+  private sockets = new Set<any>();
 
   constructor(options: TcpRpcServerOptions) {
     this.options = {
@@ -22,6 +23,7 @@ export class TcpRpcServer {
   listen() {
     const { port, host } = this.options;
     const handlers = this.handlers;
+    const self = this;
 
     this.server = Bun.listen({
       hostname: host,
@@ -29,6 +31,7 @@ export class TcpRpcServer {
       socket: {
         open(socket) {
           (socket as any)._decoder = new FrameDecoder();
+          self.sockets.add(socket);
           console.log(`[tcp-rpc] client connected`);
         },
 
@@ -74,6 +77,7 @@ export class TcpRpcServer {
         close(socket) {
           const decoder: FrameDecoder = (socket as any)._decoder;
           decoder?.reset();
+          self.sockets.delete(socket);
           console.log(`[tcp-rpc] client disconnected`);
         },
 
@@ -84,6 +88,20 @@ export class TcpRpcServer {
     });
 
     console.log(`[tcp-rpc] server listening on ${host}:${port}`);
+  }
+
+  broadcast(event: string, data?: unknown): void {
+    const frame = encodeFrame({ type: "event", event, data } satisfies RpcEvent);
+    for (const socket of this.sockets) {
+      socket.write(frame);
+      socket.flush();
+    }
+  }
+
+  broadcastTo(socket: any, event: string, data?: unknown): void {
+    const frame = encodeFrame({ type: "event", event, data } satisfies RpcEvent);
+    socket.write(frame);
+    socket.flush();
   }
 
   stop() {
