@@ -10,6 +10,7 @@ import { redis } from "@scrapest/config";
 import { KEYS, APP_URL } from "@scrapest/constants";
 import "@scrapest/core/utils/console";
 import { closeQueues } from "./utils/queues";
+import "./workers/app.worker";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
