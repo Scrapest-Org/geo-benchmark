@@ -317,12 +317,12 @@ class WS {
       await appQueue.add(
         "dispatch-events",
         { payload: [tweetEvent] },
-        { ...opts, attempts: 3, jobId: tag },
+        { ...opts, attempts: 3, jobId: `${tag}:${this.vmName}` },
       );
       await tweetQueue.add(
         "new-tweet",
         { tag, rcv: sft },
-        { ...opts, jobId: tag },
+        { ...opts, jobId: `${tag}:${this.vmName}` },
       );
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));
