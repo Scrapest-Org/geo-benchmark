@@ -4,6 +4,7 @@ import pLimit from "p-limit";
 import { SocketRegistry, SSERegistry, SSE_PUBLIC_AUTH } from "./ws";
 import SourceEvent from "@scrapest/core/resolvers";
 import { SourceMapping } from "./mapping";
+import { ApiKeyCache } from "../lib/api-key-cache";
 
 export class InternalService {
   private limit = pLimit(5);
@@ -11,13 +12,13 @@ export class InternalService {
   private async broadcast(data: SourceEvent) {
     const source = data.source === "fast-x" ? "x" : data.source;
     const rk = SourceMapping.getRK(source, data.sid);
-    const apikeys = await redis.smembers(rk);
+    const apikeys = ApiKeyCache.get(rk);
 
-    if (apikeys.length === 0) return;
-    SocketRegistry.broadcast(apikeys, data);
+    if (!apikeys?.size) return;
+    SocketRegistry.broadcast([...apikeys], data);
     SSERegistry.broadcast([...apikeys, SSE_PUBLIC_AUTH], data);
 
-    const wh_keys = apikeys.map((key) => `${KEYS.WEBHOOK}:${key}`);
+    const wh_keys = [...apikeys].map((key) => `${KEYS.WEBHOOK}:${key}`);
     const webhooks = await redis.mget(...wh_keys);
 
     return webhooks.map((url) =>

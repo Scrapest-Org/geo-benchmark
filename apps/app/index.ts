@@ -11,6 +11,7 @@ import { KEYS, APP_URL } from "@scrapest/constants";
 import "@scrapest/core/utils/console";
 import { closeQueues } from "./utils/queues";
 import "./workers/app.worker";
+import { warmup } from "./lib/api-key-cache";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -121,6 +122,7 @@ server.listen(Number(PORT), "0.0.0.0", async () => {
   console.log(`🚀 Server listening on port ${PORT}`);
 
   try {
+    await warmup();
     await appService.initialize();
     SocketRegistry.stayAlive();
     SSERegistry.stayAlive();
