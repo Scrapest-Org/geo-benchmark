@@ -2,7 +2,7 @@ import { setup, teardown, x } from "./webpush";
 import { redis, getEnv } from "@scrapest/config";
 import { AccountPoolManager, X, type Account, TXID } from "@scrapest/core";
 import "@scrapest/core/utils/console";
-import { webpushQueue } from "./helpers";
+import { userCache, webpushQueue } from "./helpers";
 import { GuestTokenManager, XGraphQL } from "@scrapest/core";
 import { tcpRpcServer } from "./rpc";
 import buildWorkers from "./worker";
@@ -52,6 +52,7 @@ const { mgmtWorker } = buildWorkers(gql, xRef);
 async function main() {
   console.log("🚀 Starting Web Push Service...");
 
+  await userCache.warmup();
   await gtm.start();
   await runWithAccount();
 }

@@ -31,6 +31,30 @@ class UserCache {
     return this.cache.get(key) || null;
   }
 
+  async warmup() {
+    let cursor = "0";
+    let count = 0;
+    do {
+      const [nextCursor, keys] = await redis.scan(
+        cursor,
+        "MATCH",
+        "uname_id:*",
+        "COUNT",
+        1000,
+      );
+      cursor = nextCursor!;
+      if (keys.length === 0) continue;
+      const values = await redis.mget(...keys);
+      for (let i = 0; i < keys.length; i++) {
+        if (values[i]) {
+          this.cache.set(keys[i]!, values[i]!);
+          count++;
+        }
+      }
+    } while (cursor !== "0");
+    console.log(`[UserCache] warmed up ${count} entries`);
+  }
+
   async bulk(users: { username: string; id: string }[]) {
     const pipeline = redis.pipeline();
     for (const { username, id } of users) {
