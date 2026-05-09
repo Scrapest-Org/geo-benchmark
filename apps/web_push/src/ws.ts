@@ -299,7 +299,7 @@ class WS {
       }
 
       const uname = tweetData.data.uri.split("/")[1] || "unknown";
-      const authorId = await userCache.get(uname);
+      const authorId = userCache.get(uname);
 
       const tweet: XPostNotification = {
         id: tag,

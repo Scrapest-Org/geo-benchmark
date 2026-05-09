@@ -22,12 +22,15 @@ async function fetchXInstance() {
 type MgmtJobNames = "unfollow-user" | "follow-user" | "update-session";
 
 function buildWorkers(gql: XGraphQL, xRef: XRef) {
-  internalEmitter.on("new-tweet", async ({ tag, rcv }: { tag: string; rcv: number }) => {
-    const t = await gql.fetchXPost(tag);
-    const se = new SourceEvent("x", t, vm, rcv);
-    tcpRpcServer.broadcast("dispatch-events", { payload: [se] });
-    console.log(`[${vm}] Processed full post: ${tag}`);
-  });
+  internalEmitter.on(
+    "new-tweet",
+    async ({ tag, rcv }: { tag: string; rcv: number }) => {
+      const t = await gql.fetchXPost(tag);
+      const se = new SourceEvent("x", t, vm, rcv);
+      tcpRpcServer.broadcast("dispatch-events", { payload: [se] });
+      console.log(`[${vm}] Processed full post: ${tag}`);
+    },
+  );
 
   const mgmtWorker = new Worker(
     `${vm}-webpush`,
@@ -37,7 +40,7 @@ function buildWorkers(gql: XGraphQL, xRef: XRef) {
           const { id, username } = job.data;
 
           console.log(`[${vm}] Following user ${username} (${id})`);
-          // const x = xRef.current ? xRef.current : await fetchXInstance(iid);
+          // const x = xRef.current ? xRef.current : await fetchXInstance();
 
           // await x.followUser(id);
           // await x.turnOnNotifications(id);

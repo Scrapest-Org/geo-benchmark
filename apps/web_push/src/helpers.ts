@@ -26,19 +26,9 @@ class UserCache {
 
   clear = () => this.cache.clear();
 
-  async get(username: string) {
+  get(username: string) {
     const key = this.normalize(username);
-
-    const localValue = this.cache.get(key);
-    if (localValue) return localValue;
-
-    const redisValue = await redis.get(key);
-    if (redisValue) {
-      this.cache.set(key, redisValue);
-      return redisValue;
-    }
-
-    return null;
+    return this.cache.get(key) || null;
   }
 
   async bulk(users: { username: string; id: string }[]) {
