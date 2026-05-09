@@ -315,6 +315,7 @@ class WS {
         lang: tweetData.lang,
       };
 
+      console.log(`Broadcast ${tag} time`);
       const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
       tcpRpcServer.broadcast("dispatch-events", { payload: [tweetEvent] });
       console.timeEnd("decrypt");

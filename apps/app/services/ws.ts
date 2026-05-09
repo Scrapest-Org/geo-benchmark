@@ -62,6 +62,7 @@ export class SocketRegistry {
         if (isFullX && socket.data.ignoreFullPayload) continue;
 
         socket.send(message);
+        console.log(`Broadcasted tag ${payload.mid} time`);
       }
     }
   }
