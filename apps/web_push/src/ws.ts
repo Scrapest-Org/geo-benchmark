@@ -304,6 +304,7 @@ class WS {
         timestamp: Number(tweetData.timestamp),
         url: `https://x.com${tweetData.data.uri}`,
         lang: tweetData.lang,
+        transport: "mozilla",
       };
 
       const fast = new SourceEvent("fast-x", tweet, vm, sft);

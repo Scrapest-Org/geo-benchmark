@@ -64,6 +64,7 @@ interface XPostNotification {
   url: string;
   id: string;
   lang: string;
+  transport: "mozilla" | "fcm";
 }
 
 interface GetXUser {

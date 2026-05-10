@@ -5,7 +5,7 @@ import { userCache } from "./user-cache";
 
 const vm = getEnv("VM_NAME");
 
-export async function handleNotification(decrypted: Buffer) {
+export function handleNotification(decrypted: Buffer) {
   const now = Date.now();
 
   try {
@@ -44,6 +44,7 @@ export async function handleNotification(decrypted: Buffer) {
       timestamp: Number(tweetData.timestamp),
       url: `https://x.com${tweetData.data.uri}`,
       lang: tweetData.lang,
+      transport: "fcm",
     };
 
     const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);

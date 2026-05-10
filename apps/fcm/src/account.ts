@@ -194,7 +194,7 @@ async function runOneSession(
       continue;
     }
 
-    await handleNotification(Buffer.from(plain));
+    handleNotification(Buffer.from(plain));
 
     if (!state.received_persistent_ids.includes(msg.persistentId)) {
       if (state.received_persistent_ids.length >= 10) {
