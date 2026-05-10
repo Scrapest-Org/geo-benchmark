@@ -287,7 +287,7 @@ class WS {
 
       console.log(
         "~|",
-        `post ${tag} >>${Number(tweetData.timestamp) - sft}ms>> autopush >>${now - Number(tweetData.timestamp)}ms>> client`,
+        `[mozilla] post ${tag} >>${Number(tweetData.timestamp) - sft}ms>> autopush >>${now - Number(tweetData.timestamp)}ms>> client`,
       );
 
       const uname = tweetData.data.uri.split("/")[1] || "unknown";

@@ -9,7 +9,8 @@
     "@scrapest/axios": "workspace:*",
     "linkedom": "^0.18.12",
     "otpauth": "^9.4.1",
-    "node-telegram-bot-api": "^0.67.0"
+    "node-telegram-bot-api": "^0.67.0",
+    "lru-cache": "^11.3.5"
   },
   "exports": {
     ".": {
@@ -22,10 +23,10 @@
       "import": "./utils/index.ts",
       "default": "./utils/index.ts"
     },
-    "./lib": {
-      "bun": "./lib/tweet.ts",
-      "import": "./lib/tweet.ts",
-      "default": "./lib/tweet.ts"
+    "./cache": {
+      "bun": "./lib/cache/index.ts",
+      "import": "./lib/cache/index.ts",
+      "default": "./lib/cache/index.ts"
     },
     "./resolvers": {
       "bun": "./lib/resolvers/index.ts",

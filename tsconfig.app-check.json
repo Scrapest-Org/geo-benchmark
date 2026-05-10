@@ -15,6 +15,7 @@
     "apps/txid/**",
     "apps/web_poll/**",
     "apps/web_push/**",
+    "apps/fcm/**",
     "scripts/**"
   ]
 }

@@ -3,7 +3,6 @@
 // 1:1 port of `src/main.rs` argument surface.
 
 import { Command } from "commander";
-import { newSharedState, runAccount } from "./account.ts";
 import { defaultConfigPath, loadConfig } from "./config.ts";
 import { loadState } from "./state.ts";
 import { sendTestPush } from "./test-push.ts";
@@ -23,37 +22,6 @@ program
     process.stdout.write(
       `config OK: ${cfg.accounts.length} accounts, state at ${cfg.options.statePath}\n`,
     );
-  });
-
-program
-  .command("run")
-  .option("--config <path>", "path to accounts.toml")
-  .option("--resubscribe", "force re-call of Twitter login.json")
-  .action(async (opts: { config?: string; resubscribe?: boolean }) => {
-    const path = opts.config ?? defaultConfigPath();
-    const cfg = loadConfig(path);
-    const state = loadState(cfg.options.statePath);
-
-    const shared = newSharedState(state, cfg.options.statePath, cfg.options);
-    const tasks: Promise<void>[] = [];
-    for (const account of cfg.accounts) {
-      const cookies = { authToken: account.authToken, ct0: account.ct0 };
-      tasks.push(
-        runAccount(account.label, cookies, shared, opts.resubscribe ?? false).catch((e: unknown) => {
-          process.stderr.write(
-            `${new Date().toISOString()} ERROR account terminated with error account=${account.label} error=${JSON.stringify(String(e))}\n`,
-          );
-        }),
-      );
-    }
-
-    await new Promise<void>((resolve) => {
-      const stop = () => resolve();
-      process.once("SIGINT", stop);
-      process.once("SIGTERM", stop);
-      Promise.all(tasks).then(() => resolve());
-    });
-    process.stderr.write(`${new Date().toISOString()} INFO  shutdown\n`);
   });
 
 program

@@ -1,111 +1,46 @@
-// Per-account orchestrator. One async runner per account holds the FCM
-// credentials in memory, opens a TLS connection to MCS, processes inbound
-// data messages, and reconnects with exponential backoff on errors.
-//
-// 1:1 port of `src/account.rs`.
-
 import { createECDH, randomBytes, randomUUID } from "node:crypto";
 import { connect as tlsConnect } from "node:tls";
-import { CHECKIN_URL, checkin } from "./checkin.ts";
-import type { Options } from "./config.ts";
-import { type Subscriber, decryptAes128gcm, decryptAesgcm, subscriberFromRaw } from "./crypto.ts";
-import { emit } from "./emit.ts";
-import { Session } from "./mcs/stream.ts";
-import { REGISTER_URL, register } from "./register.ts";
-import { type AccountState, type State, recordPersistentId, saveStateAtomic } from "./state.ts";
+import { AccountPoolManager } from "@scrapest/core";
+import { getEnv } from "@scrapest/config";
+import { CHECKIN_URL, checkin } from "./checkin";
+import { REGISTER_URL, register } from "./register";
 import {
-  type Cookies,
+  subscriberFromRaw,
+  type Subscriber,
+  decryptAes128gcm,
+  decryptAesgcm,
+} from "./crypto";
+import { loadFcmState, saveFcmState } from "./lib/state";
+import type { FcmState } from "./lib/state";
+import { handleNotification } from "./lib/notify";
+import { Session } from "./mcs/stream";
+import {
   SUBSCRIBE_URL,
   TWITTER_VAPID_PUBLIC_KEY,
   TwitterAuthError,
   subscribe,
-} from "./twitter.ts";
+} from "./twitter";
+import "@scrapest/core/utils/console";
 
-export interface SharedState {
-  state: State;
-  statePath: string;
-  options: Options;
-  /** Serializes concurrent saves across account tasks. */
-  saveLock: { busy: boolean; queue: Array<() => void> };
-}
+const vm = getEnv("VM_NAME");
+const apm = new AccountPoolManager();
 
-export function newSharedState(state: State, statePath: string, options: Options): SharedState {
-  return { state, statePath, options, saveLock: { busy: false, queue: [] } };
-}
+export async function runWithAccount() {
+  const account = await apm.getAccount({ claimKey: vm });
+  const cookies = { ct0: account.CT0, authToken: account.AUTH_TOKEN };
 
-async function withSaveLock(shared: SharedState, fn: () => Promise<void>): Promise<void> {
-  if (shared.saveLock.busy) {
-    await new Promise<void>((resolve) => shared.saveLock.queue.push(resolve));
-  }
-  shared.saveLock.busy = true;
-  try {
-    await fn();
-  } finally {
-    shared.saveLock.busy = false;
-    const next = shared.saveLock.queue.shift();
-    if (next) next();
-  }
-}
+  let state = await loadFcmState(vm);
 
-async function saveShared(shared: SharedState): Promise<void> {
-  await withSaveLock(shared, async () => {
-    saveStateAtomic(shared.state, shared.statePath);
-  });
-}
-
-const log = {
-  info(msg: string, fields?: Record<string, unknown>) {
-    process.stderr.write(`${ts()} INFO  ${msg}${fmtFields(fields)}\n`);
-  },
-  warn(msg: string, fields?: Record<string, unknown>) {
-    process.stderr.write(`${ts()} WARN  ${msg}${fmtFields(fields)}\n`);
-  },
-  error(msg: string, fields?: Record<string, unknown>) {
-    process.stderr.write(`${ts()} ERROR ${msg}${fmtFields(fields)}\n`);
-  },
-  debug(msg: string, fields?: Record<string, unknown>) {
-    if (process.env.RUST_LOG?.includes("debug") || process.env.DEBUG) {
-      process.stderr.write(`${ts()} DEBUG ${msg}${fmtFields(fields)}\n`);
-    }
-  },
-};
-
-function ts(): string {
-  return new Date().toISOString();
-}
-
-function fmtFields(fields?: Record<string, unknown>): string {
-  if (!fields) return "";
-  const parts: string[] = [];
-  for (const [k, v] of Object.entries(fields)) parts.push(`${k}=${JSON.stringify(v)}`);
-  return parts.length > 0 ? " " + parts.join(" ") : "";
-}
-
-export async function runAccount(
-  label: string,
-  cookies: Cookies,
-  shared: SharedState,
-  forceResubscribe: boolean,
-): Promise<void> {
-  await bootstrapIfNeeded(label, cookies, shared, forceResubscribe);
-  await receiveForever(label, shared);
-}
-
-async function bootstrapIfNeeded(
-  label: string,
-  cookies: Cookies,
-  shared: SharedState,
-  forceResubscribe: boolean,
-): Promise<void> {
-  const existing = shared.state.accounts[label];
-  if (!existing) {
-    log.info("no existing FCM credentials — running checkin + register", { label });
+  if (!state) {
+    console.info("no existing FCM credentials — running checkin + register", {
+      vm,
+    });
 
     const cred = await checkin(CHECKIN_URL);
     const ecdh = createECDH("prime256v1");
     ecdh.generateKeys();
     const ecdhPriv = ecdh.getPrivateKey();
-    const ecdhPub = ecdh.getPublicKey(); // 65-byte uncompressed SEC1 by default
+    const ecdhPub = ecdh.getPublicKey();
     const authSecret = randomBytes(16);
     const subtype = `wp:${randomUUID()}`;
 
@@ -128,17 +63,22 @@ async function bootstrapIfNeeded(
         ecdhPubB64,
         authSecretB64,
         cookies,
-        shared.options.locale,
+        "en",
       );
-      log.info("twitter login.json response", { status: 200, len: respText.length });
+      console.info("twitter login.json response", {
+        status: 200,
+        len: respText.length,
+      });
     } catch (err) {
       if (err instanceof TwitterAuthError) {
-        throw new Error(`twitter auth failed (HTTP ${err.status}): ${err.body}`);
+        throw new Error(
+          `twitter auth failed (HTTP ${err.status}): ${err.body}`,
+        );
       }
       throw err;
     }
 
-    shared.state.accounts[label] = {
+    state = {
       android_id: cred.androidId.toString(),
       security_token: cred.securityToken.toString(),
       fcm_token: fcmToken,
@@ -149,53 +89,65 @@ async function bootstrapIfNeeded(
       twitter_subscribed: true,
       received_persistent_ids: [],
     };
-    await saveShared(shared);
-    log.info("bootstrap complete", { label });
-  } else if (forceResubscribe) {
-    const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${existing.fcm_token}`;
+    await saveFcmState(vm, state);
+    console.info("bootstrap complete", { vm });
+  } else if (!state.twitter_subscribed) {
+    const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${state.fcm_token}`;
     await subscribe(
       SUBSCRIBE_URL,
       fcmEndpoint,
-      existing.ecdh_public_b64,
-      existing.auth_secret_b64,
+      state.ecdh_public_b64,
+      state.auth_secret_b64,
       cookies,
-      shared.options.locale,
+      "en",
     );
-    log.info("twitter subscription refreshed", { label });
+    state.twitter_subscribed = true;
+    await saveFcmState(vm, state);
+    console.info("twitter subscription refreshed", { vm });
   }
+
+  const subscriber = buildSubscriber(state);
+  await receiveForever(state, subscriber);
 }
 
-async function receiveForever(label: string, shared: SharedState): Promise<void> {
+async function receiveForever(
+  state: FcmState,
+  subscriber: Subscriber,
+): Promise<void> {
   let backoffMs = 1000;
   for (;;) {
     try {
-      await runOneSession(label, shared);
-      log.info("MCS connection closed cleanly; reconnecting", { label });
+      await runOneSession(state, subscriber);
+      console.info("MCS connection closed cleanly; reconnecting", { vm });
       backoffMs = 1000;
     } catch (err) {
-      log.warn("MCS session error", { label, error: String(err) });
+      console.warn("MCS session error", { vm, error: String(err) });
       await sleep(backoffMs);
       backoffMs = Math.min(backoffMs * 2, 300_000);
     }
   }
 }
 
-async function runOneSession(label: string, shared: SharedState): Promise<void> {
-  const snap = shared.state.accounts[label];
-  if (!snap) throw new Error(`no state for account ${label}`);
+async function runOneSession(
+  state: FcmState,
+  subscriber: Subscriber,
+): Promise<void> {
+  const androidId = BigInt(state.android_id);
+  const securityToken = BigInt(state.security_token);
+  const persistentIds = [...state.received_persistent_ids];
 
-  const androidId = BigInt(snap.android_id);
-  const securityToken = BigInt(snap.security_token);
-  const persistentIds = [...snap.received_persistent_ids];
+  const mtalkHost = process.env.MTALK_HOST ?? "mtalk.google.com:5228";
+  console.info("opening MCS TLS connection", { vm, host: mtalkHost });
+  const socket = await openTls(mtalkHost);
+  console.info("TLS handshake done; sending LoginRequest", { vm });
 
-  log.info("opening MCS TLS connection", { label, host: shared.options.mtalkHost });
-  const socket = await openTls(shared.options.mtalkHost);
-  log.info("TLS handshake done; sending LoginRequest", { label });
-
-  const session = await Session.login(socket, androidId, securityToken, persistentIds, log);
-  log.info("MCS connected and logged in", { label, host: shared.options.mtalkHost });
-
-  const subscriber = buildSubscriber(snap);
+  const session = await Session.login(
+    socket,
+    androidId,
+    securityToken,
+    persistentIds,
+  );
+  console.info("MCS logged in", { vm, host: mtalkHost });
 
   for (;;) {
     const msg = await session.nextData();
@@ -207,9 +159,22 @@ async function runOneSession(label: string, shared: SharedState): Promise<void> 
       if (!encoding || encoding === "aes128gcm") {
         plain = decryptAes128gcm(msg.rawData, subscriber);
       } else if (encoding === "aesgcm") {
-        plain = decryptLegacyAesgcm(msg.rawData, msg.headers, subscriber);
+        const enc = msg.headers["encryption"] ?? "";
+        const ck = msg.headers["crypto-key"] ?? "";
+        const saltB64 = parseNamedParam(enc, "salt");
+        const dhB64 = parseNamedParam(ck, "dh");
+        if (!saltB64) throw new Error("aesgcm: missing salt");
+        if (!dhB64) throw new Error("aesgcm: missing dh");
+        const salt = Buffer.from(saltB64.replace(/=+$/, ""), "base64url");
+        const asPub = Buffer.from(dhB64.replace(/=+$/, ""), "base64url");
+        plain = decryptAesgcm(
+          new Uint8Array(msg.rawData),
+          new Uint8Array(salt),
+          new Uint8Array(asPub),
+          subscriber,
+        );
       } else {
-        log.warn("unsupported content-encoding; skipping", { encoding });
+        console.warn("unsupported content-encoding; skipping", { encoding });
         continue;
       }
     } catch (err) {
@@ -218,67 +183,52 @@ async function runOneSession(label: string, shared: SharedState): Promise<void> 
         const fs = await import("node:fs");
         fs.writeFileSync(dumpPath, Buffer.from(msg.rawData));
       } catch {}
-      log.warn("decrypt failed; skipping", {
-        label,
+      console.warn("decrypt failed; skipping", {
+        vm,
         persistent_id: msg.persistentId,
         encoding: encoding ?? "(none)",
-        encryption_header: msg.headers["encryption"] ?? "(none)",
-        crypto_key_header: msg.headers["crypto-key"]?.slice(0, 60) ?? "(none)",
-        raw_data_len: msg.rawData.length,
-        dump: dumpPath,
         error: String(err),
+        dump: dumpPath,
       });
       continue;
     }
 
-    try {
-      emit(label, msg.persistentId, plain);
-    } catch (err) {
-      log.warn("failed to emit notification", { label, error: String(err) });
-    }
+    await handleNotification(Buffer.from(plain));
 
-    const live = shared.state.accounts[label];
-    if (live) recordPersistentId(live, msg.persistentId);
-    await saveShared(shared);
+    if (!state.received_persistent_ids.includes(msg.persistentId)) {
+      if (state.received_persistent_ids.length >= 10) {
+        state.received_persistent_ids.shift();
+      }
+      state.received_persistent_ids.push(msg.persistentId);
+    }
+    await saveFcmState(vm, state);
   }
 }
 
-function decryptLegacyAesgcm(
-  rawData: Uint8Array,
-  headers: Record<string, string>,
-  sub: Subscriber,
-): Uint8Array {
-  const enc = headers["encryption"] ?? "";
-  const ck = headers["crypto-key"] ?? "";
-  const saltB64 = parseNamedParam(enc, "salt");
-  const dhB64 = parseNamedParam(ck, "dh");
-  if (!saltB64) throw new Error("aesgcm: missing salt in encryption header");
-  if (!dhB64) throw new Error("aesgcm: missing dh in crypto-key header");
-  const salt = Buffer.from(saltB64.replace(/=+$/, ""), "base64url");
-  const asPub = Buffer.from(dhB64.replace(/=+$/, ""), "base64url");
-  return decryptAesgcm(new Uint8Array(rawData), new Uint8Array(salt), new Uint8Array(asPub), sub);
-}
-
-/** Pluck `<name>=<value>` from a `;`-or-`,`-separated header. Tolerates the
- *  empty leading segment Twitter sends (`"; salt=…"`). */
 function parseNamedParam(header: string, name: string): string | null {
   for (const seg of header.split(/[;,]/)) {
     const trimmed = seg.trim();
-    if (trimmed.startsWith(name + "=")) return trimmed.slice(name.length + 1).trim();
+    if (trimmed.startsWith(name + "="))
+      return trimmed.slice(name.length + 1).trim();
   }
   return null;
 }
 
-function buildSubscriber(snap: AccountState): Subscriber {
-  const priv = Buffer.from(snap.ecdh_private_b64, "base64url");
-  const pub = Buffer.from(snap.ecdh_public_b64, "base64url");
-  const auth = Buffer.from(snap.auth_secret_b64, "base64url");
-  return subscriberFromRaw(new Uint8Array(priv), new Uint8Array(pub), new Uint8Array(auth));
+function buildSubscriber(state: FcmState): Subscriber {
+  const priv = Buffer.from(state.ecdh_private_b64, "base64url");
+  const pub = Buffer.from(state.ecdh_public_b64, "base64url");
+  const auth = Buffer.from(state.auth_secret_b64, "base64url");
+  return subscriberFromRaw(
+    new Uint8Array(priv),
+    new Uint8Array(pub),
+    new Uint8Array(auth),
+  );
 }
 
 async function openTls(hostPort: string): Promise<import("node:net").Socket> {
   const lastColon = hostPort.lastIndexOf(":");
-  if (lastColon < 0) throw new Error(`mtalk_host must include port: ${hostPort}`);
+  if (lastColon < 0)
+    throw new Error(`mtalk_host must include port: ${hostPort}`);
   const host = hostPort.slice(0, lastColon);
   const port = Number.parseInt(hostPort.slice(lastColon + 1), 10);
 
