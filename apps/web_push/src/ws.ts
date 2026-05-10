@@ -308,8 +308,8 @@ class WS {
       };
 
       console.log(`Broadcast ${tag} time`);
-      const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
-      appClient.emit("dispatch-events", { payload: [tweetEvent] });
+      const fast = new SourceEvent("fast-x", tweet, vm, sft);
+      appClient.emit("dispatch-events", { payload: [fast], app: "webpush" });
       console.timeEnd("decrypt");
       internalEmitter.emit("new-tweet", { tag, rcv: sft });
     } catch (error) {

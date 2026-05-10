@@ -11,7 +11,7 @@ function buildWorkers(gql: XGraphQL) {
     async ({ tag, rcv }: { tag: string; rcv: number }) => {
       const t = await gql.fetchXPost(tag);
       const se = new SourceEvent("x", t, vm, rcv);
-      tcpRpcClient.emit("dispatch-events", { payload: [se] });
+      tcpRpcClient.emit("dispatch-events", { payload: [se], app: "fcm" });
       console.log(`[${vm}] [fcm] Processed full post: ${tag}`);
     },
   );

@@ -9,7 +9,6 @@ export async function handleNotification(decrypted: Buffer) {
   const now = Date.now();
 
   try {
-    console.time("decrypt");
     const text = new TextDecoder().decode(decrypted);
     //     parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(decrypted));
 
@@ -47,10 +46,9 @@ export async function handleNotification(decrypted: Buffer) {
       lang: tweetData.lang,
     };
 
-    console.log(`Broadcast ${tag} time`);
     const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
-    tcpRpcClient.emit("dispatch-events", { payload: [tweetEvent] });
-    console.timeEnd("decrypt");
+    console.log(`Broadcast ${tag} time`);
+    tcpRpcClient.emit("dispatch-events", { payload: [tweetEvent], app: "fcm" });
     internalEmitter.emit("new-tweet", { tag, rcv: sft });
   } catch (error) {
     const e = error instanceof Error ? error : new Error(String(error));

@@ -27,7 +27,7 @@ function buildWorkers(gql: XGraphQL, xRef: XRef) {
     async ({ tag, rcv }: { tag: string; rcv: number }) => {
       const t = await gql.fetchXPost(tag);
       const se = new SourceEvent("x", t, vm, rcv);
-      appClient.emit("dispatch-events", { payload: [se] });
+      appClient.emit("dispatch-events", { payload: [se], app: "webpush" });
       console.log(`[${vm}] Processed full post: ${tag}`);
     },
   );
