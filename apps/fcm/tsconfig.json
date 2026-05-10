@@ -35,6 +35,7 @@
   "include": [
     "src/**/*",
     "tests/**/*",
-    "gen/**/*"
+    "gen/**/*",
+    "../../packages/core/types/types.d.ts"
   ]
 }
