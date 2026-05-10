@@ -1,6 +1,26 @@
 import { encodeFrame, FrameDecoder } from "./framing";
 
-const MAX_FRAME_BYTES = 64 * 1024; // 64KB
+function writeOrBuffer(socket: any, frame: Buffer): void {
+  if (socket._pending) {
+    socket._pending = Buffer.concat([socket._pending, frame]);
+    return;
+  }
+  const wrote = socket.write(frame);
+  if (wrote < frame.byteLength) {
+    socket._pending = frame.subarray(wrote);
+  }
+}
+
+function flushSocket(socket: any): void {
+  const pending = socket._pending as Buffer | null;
+  if (!pending) return;
+  const wrote = socket.write(pending);
+  if (wrote < pending.byteLength) {
+    socket._pending = pending.subarray(wrote);
+  } else {
+    socket._pending = null;
+  }
+}
 
 export class TcpRpcServer {
   private handlers = new Map<string, RpcHandler>();
@@ -45,6 +65,7 @@ export class TcpRpcServer {
       socket: {
         open(socket) {
           (socket as any)._decoder = new FrameDecoder();
+          (socket as any)._pending = null;
           self.sockets.add(socket);
           console.log(`[tcp-rpc] client connected`);
         },
@@ -75,21 +96,7 @@ export class TcpRpcServer {
               }
             }
 
-            const frame = encodeFrame(response);
-            console.log("[rpc] frame size:", frame.length);
-
-            if (frame.length > MAX_FRAME_BYTES) {
-              const errorFrame = encodeFrame({
-                id: req.id,
-                error: `Response too large: ${frame.length} bytes (max ${MAX_FRAME_BYTES}).`,
-              });
-              socket.write(errorFrame);
-              socket.flush();
-              continue;
-            }
-
-            socket.write(frame);
-            socket.flush();
+            writeOrBuffer(socket, encodeFrame(response));
           }
         },
 
@@ -98,6 +105,10 @@ export class TcpRpcServer {
           decoder?.reset();
           self.sockets.delete(socket);
           console.log(`[tcp-rpc] client disconnected`);
+        },
+
+        drain(socket) {
+          flushSocket(socket);
         },
 
         error(_socket, err) {
@@ -112,15 +123,13 @@ export class TcpRpcServer {
   broadcast(event: string, data?: unknown): void {
     const frame = encodeFrame({ type: "event", event, data } satisfies RpcEvent);
     for (const socket of this.sockets) {
-      socket.write(frame);
-      socket.flush();
+      writeOrBuffer(socket, frame);
     }
   }
 
   broadcastTo(socket: any, event: string, data?: unknown): void {
     const frame = encodeFrame({ type: "event", event, data } satisfies RpcEvent);
-    socket.write(frame);
-    socket.flush();
+    writeOrBuffer(socket, frame);
   }
 
   private _dispatchEvent(event: string, data: unknown, socket: any) {

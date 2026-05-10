@@ -6,6 +6,28 @@ const DEFAULT_TIMEOUT = 10_000;
 const DEFAULT_RECONNECT_DELAY = 500;
 const DEFAULT_MAX_RECONNECT_DELAY = 16_000;
 
+function writeOrBuffer(socket: any, frame: Buffer): void {
+  if (socket._pending) {
+    socket._pending = Buffer.concat([socket._pending, frame]);
+    return;
+  }
+  const wrote = socket.write(frame);
+  if (wrote < frame.byteLength) {
+    socket._pending = frame.subarray(wrote);
+  }
+}
+
+function flushSocket(socket: any): void {
+  const pending = socket._pending as Buffer | null;
+  if (!pending) return;
+  const wrote = socket.write(pending);
+  if (wrote < pending.byteLength) {
+    socket._pending = pending.subarray(wrote);
+  } else {
+    socket._pending = null;
+  }
+}
+
 export class TcpRpcClient {
   private options: Required<TcpRpcClientOptions>;
   private socket: BunSocket | null = null;
@@ -45,6 +67,7 @@ export class TcpRpcClient {
         socket: {
           open(socket) {
             self.socket = socket as any;
+            (socket as any)._pending = null;
             self.reconnectAttempt = 0;
             self.decoder.reset();
             console.log(`[tcp-rpc] connected to ${host}:${port}`);
@@ -67,6 +90,10 @@ export class TcpRpcClient {
             console.warn(`[tcp-rpc] connection closed`);
             self._rejectAllPending(new Error("Connection closed"));
             if (!self.destroyed) self._scheduleReconnect();
+          },
+
+          drain(socket) {
+            flushSocket(socket);
           },
 
           error(_socket, err) {
@@ -173,13 +200,13 @@ export class TcpRpcClient {
         timer,
       });
 
-      this.socket!.write(encodeFrame({ id, method, params }));
+      writeOrBuffer(this.socket!, encodeFrame({ id, method, params }));
     });
   }
 
   emit(event: string, data?: unknown): void {
     if (!this.socket) return;
-    this.socket.write(encodeFrame({ type: "event", event, data } satisfies RpcEvent));
+    writeOrBuffer(this.socket, encodeFrame({ type: "event", event, data } satisfies RpcEvent));
   }
 
   destroy() {

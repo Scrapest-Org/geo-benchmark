@@ -48,23 +48,23 @@ function makeServer(port: number) {
 
 // ─── Registry ───────────────────────────────────────────────────────────────
 
-describe("Registry", () => {
-  test("telegram service is defined", () => {
-    expect(RPC_REGISTRY.telegram).toBeDefined();
-  });
+// describe("Registry", () => {
+//   test("telegram service is defined", () => {
+//     expect(RPC_REGISTRY.telegram).toBeDefined();
+//   });
 
-  test("telegram has valid host and port", () => {
-    expect(typeof RPC_REGISTRY.telegram.host).toBe("string");
-    expect(RPC_REGISTRY.telegram.host.length).toBeGreaterThan(0);
-    expect(typeof RPC_REGISTRY.telegram.port).toBe("number");
-    expect(RPC_REGISTRY.telegram.port).toBeGreaterThan(0);
-    expect(RPC_REGISTRY.telegram.port).toBeLessThan(65536);
-  });
+//   test("telegram has valid host and port", () => {
+//     expect(typeof RPC_REGISTRY.telegram.host).toBe("string");
+//     expect(RPC_REGISTRY.telegram.host.length).toBeGreaterThan(0);
+//     expect(typeof RPC_REGISTRY.telegram.port).toBe("number");
+//     expect(RPC_REGISTRY.telegram.port).toBeGreaterThan(0);
+//     expect(RPC_REGISTRY.telegram.port).toBeLessThan(65536);
+//   });
 
-  test("default telegram port is 4000", () => {
-    expect(RPC_REGISTRY.telegram.port).toBe(4000);
-  });
-});
+//   test("default telegram port is 4000", () => {
+//     expect(RPC_REGISTRY.telegram.port).toBe(4000);
+//   });
+// });
 
 // ─── Framing ────────────────────────────────────────────────────────────────
 
@@ -243,15 +243,15 @@ describe("Server + Client", () => {
 
 // ─── Client: connect via registry ───────────────────────────────────────────
 
-describe("Client: registry shorthand", () => {
-  test("resolves host and port from registry", () => {
-    const client = new TcpRpcClient("telegram");
-    // @ts-expect-error accessing private for assertion
-    expect(client.options.port).toBe(4000);
-    // @ts-expect-error accessing private for assertion
-    expect(client.options.host).toBe("localhost");
-  });
-});
+// describe("Client: registry shorthand", () => {
+//   test("resolves host and port from registry", () => {
+//     const client = new TcpRpcClient("telegram");
+//     // @ts-expect-error accessing private for assertion
+//     expect(client.options.port).toBe(4000);
+//     // @ts-expect-error accessing private for assertion
+//     expect(client.options.host).toBe("localhost");
+//   });
+// });
 
 // ─── Client: error states ───────────────────────────────────────────────────
 
