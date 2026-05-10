@@ -177,6 +177,11 @@ export class TcpRpcClient {
     });
   }
 
+  emit(event: string, data?: unknown): void {
+    if (!this.socket) return;
+    this.socket.write(encodeFrame({ type: "event", event, data } satisfies RpcEvent));
+  }
+
   destroy() {
     this.destroyed = true;
     this._rejectAllPending(new Error("Client destroyed"));

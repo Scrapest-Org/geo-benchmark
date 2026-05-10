@@ -4,6 +4,7 @@ const MAX_FRAME_BYTES = 64 * 1024; // 64KB
 
 export class TcpRpcServer {
   private handlers = new Map<string, RpcHandler>();
+  private eventListeners = new Map<string, Set<(data: unknown, socket: any) => void>>();
   private options: Required<TcpRpcServerOptions>;
   private server: { stop: (force?: boolean) => void } | null = null;
   private sockets = new Set<any>();
@@ -13,6 +14,19 @@ export class TcpRpcServer {
       host: "0.0.0.0",
       ...options,
     };
+  }
+
+  on(event: string, handler: (data: unknown, socket: any) => void): this {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, new Set());
+    }
+    this.eventListeners.get(event)!.add(handler);
+    return this;
+  }
+
+  off(event: string, handler: (data: unknown, socket: any) => void): this {
+    this.eventListeners.get(event)?.delete(handler);
+    return this;
   }
 
   handle<P = unknown, R = unknown>(method: string, handler: RpcHandler<P, R>) {
@@ -40,6 +54,11 @@ export class TcpRpcServer {
           const messages = decoder.feed(Buffer.from(chunk));
 
           for (const message of messages) {
+            if ("event" in message) {
+              const ev = message as RpcEvent;
+              self._dispatchEvent(ev.event, ev.data, socket);
+              continue;
+            }
             const req = message as RpcRequest;
             const response: RpcResponse = { id: req.id };
 
@@ -102,6 +121,14 @@ export class TcpRpcServer {
     const frame = encodeFrame({ type: "event", event, data } satisfies RpcEvent);
     socket.write(frame);
     socket.flush();
+  }
+
+  private _dispatchEvent(event: string, data: unknown, socket: any) {
+    const handlers = this.eventListeners.get(event);
+    if (!handlers) return;
+    for (const handler of handlers) {
+      handler(data, socket);
+    }
   }
 
   stop() {

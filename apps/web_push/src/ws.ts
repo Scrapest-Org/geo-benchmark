@@ -12,7 +12,7 @@ import { fireFoxUserAgent, TIME } from "@scrapest/constants";
 import { getEnv } from "@scrapest/config";
 import { userCache } from "./helpers";
 import SourceEvent from "@scrapest/core/resolvers";
-import { tcpRpcServer, internalEmitter } from "./rpc";
+import { appClient, internalEmitter } from "./rpc";
 
 type SendJSONPayload = {
   messageType: string;
@@ -290,14 +290,6 @@ class WS {
         `post ${tag} >>${Number(tweetData.timestamp) - sft}ms>> autopush >>${now - Number(tweetData.timestamp)}ms>> client`,
       );
 
-      const ageMs = now - sft;
-      if (ageMs > TIME._5MIN) {
-        console.info(
-          `Skipping stale tweet ${tag} (Age: ${Math.round(ageMs / 1000)}s)`,
-        );
-        return;
-      }
-
       const uname = tweetData.data.uri.split("/")[1] || "unknown";
       const authorId = userCache.get(uname);
 
@@ -317,7 +309,7 @@ class WS {
 
       console.log(`Broadcast ${tag} time`);
       const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
-      tcpRpcServer.broadcast("dispatch-events", { payload: [tweetEvent] });
+      appClient.emit("dispatch-events", { payload: [tweetEvent] });
       console.timeEnd("decrypt");
       internalEmitter.emit("new-tweet", { tag, rcv: sft });
     } catch (error) {

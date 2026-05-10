@@ -3,7 +3,7 @@ import { X, type XGraphQL } from "@scrapest/core";
 import SourceEvent from "@scrapest/core/resolvers";
 import { type Job, Worker } from "bullmq";
 import { userCache } from "./helpers";
-import { tcpRpcServer, internalEmitter } from "./rpc";
+import { appClient, internalEmitter } from "./rpc";
 
 interface XRef {
   current: X | null;
@@ -27,7 +27,7 @@ function buildWorkers(gql: XGraphQL, xRef: XRef) {
     async ({ tag, rcv }: { tag: string; rcv: number }) => {
       const t = await gql.fetchXPost(tag);
       const se = new SourceEvent("x", t, vm, rcv);
-      tcpRpcServer.broadcast("dispatch-events", { payload: [se] });
+      appClient.emit("dispatch-events", { payload: [se] });
       console.log(`[${vm}] Processed full post: ${tag}`);
     },
   );

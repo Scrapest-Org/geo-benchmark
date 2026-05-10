@@ -2,7 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import { router, app as appService, client } from "./routes";
+import { tcpRpcServer } from "./lib/rpc";
+import { router, app as appService } from "./routes";
 import { SocketRegistry, SSERegistry, type Socket } from "./services/ws";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
@@ -132,10 +133,6 @@ server.listen(Number(PORT), "0.0.0.0", async () => {
   }
 });
 
-await client.connect().catch(() => {
-  console.warn("⚠️ Webpush RPC not available yet, retrying...");
-});
-
 async function shutdown(signal: string) {
   console.log(`\nReceived ${signal}, stopping app service and server...`);
   const forceExitTimeout = setTimeout(() => {
@@ -147,7 +144,7 @@ async function shutdown(signal: string) {
 
   try {
     appService.stop();
-    client.destroy();
+    tcpRpcServer.stop();
     console.log(`Closing ${wss.clients.size} active WebSockets...`);
     for (const client of wss.clients) {
       client.terminate();

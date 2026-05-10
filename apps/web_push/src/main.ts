@@ -4,7 +4,7 @@ import { AccountPoolManager, X, type Account, TXID } from "@scrapest/core";
 import "@scrapest/core/utils/console";
 import { userCache, webpushQueue } from "./helpers";
 import { GuestTokenManager, XGraphQL } from "@scrapest/core";
-import { tcpRpcServer } from "./rpc";
+import { appClient } from "./rpc";
 import buildWorkers from "./worker";
 import { TIME } from "@scrapest/constants";
 
@@ -56,7 +56,9 @@ async function main() {
   await gtm.start();
   await runWithAccount();
 }
-
+appClient.connect().catch(() => {
+  console.warn("⚠️ App RPC not available yet, retrying...");
+});
 main().catch((err) => {
   console.error("FATAL ERROR:", err);
   process.exit(1);
@@ -75,7 +77,7 @@ const cleanup = async () => {
     webpushQueue.close(),
   ]);
 
-  tcpRpcServer.stop();
+  appClient.destroy();
   await redis.quit();
   gtm.stop();
 

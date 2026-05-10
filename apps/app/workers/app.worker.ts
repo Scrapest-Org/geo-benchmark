@@ -1,11 +1,12 @@
-import { client } from "../routes";
+import { tcpRpcServer } from "../lib/rpc";
 import { InternalService } from "../services/internal";
 
 const internal = new InternalService();
 
-client.on("dispatch-events", async (data: unknown) => {
+tcpRpcServer.on("dispatch-events", async (data: unknown) => {
+  const { payload, app } = data as { payload: any; app: string };
+  console.log(app, Date.now());
   try {
-    const { payload } = data as { payload: any };
     if (!payload || !payload.length) throw new Error("No payload provided");
 
     await internal.handleDispatch(payload);

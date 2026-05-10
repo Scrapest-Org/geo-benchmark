@@ -5,11 +5,8 @@ import { initSSE } from "../middleware/sse";
 import { MetricsController } from "../controllers/metrics.controller";
 import { TrackingController } from "../controllers/tracking.controller";
 import { StreamController } from "../controllers/stream.controller";
-import { TcpRpcClient } from "@scrapest/tcp-rpc";
-
 const router = Router();
 const app = new AppService();
-const client = new TcpRpcClient("webpush");
 
 const metricsController = new MetricsController(app);
 const trackingController = new TrackingController(app);
@@ -28,4 +25,4 @@ router.get("/metrics/:source", metricsController.metricsBySource);
 router.post("/stream/token", requireAnyKey, streamController.generateToken);
 router.get("/stream", initSSE, streamController.stream);
 
-export { router, app, client };
+export { router, app };
