@@ -46,10 +46,8 @@ await client.connect().catch(() => {
 
 for (let i = 0; i < 3; i++) {
   await Bun.sleep(1_000 * i);
-  console.log(`Dispatching event ${i + 1}`);
-  console.log(Date.now());
-  client.emit("dispatch-events", { payload: [payload] });
-  console.log("Event dispatched");
+  console.log("webpush", Date.now());
+  client.emit("dispatch-events", { payload: [payload], app: "web_push" });
 }
 
 process.exit(0);

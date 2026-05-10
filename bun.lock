@@ -37,10 +37,10 @@
       },
     },
     "apps/fcm": {
-      "name": "chrome-fcm-ts",
+      "name": "@scrapest/fcm",
       "version": "0.1.0",
       "bin": {
-        "chrome-fcm-ts": "./src/index.ts",
+        "@scrapest/fcm": "./src/index.ts",
       },
       "dependencies": {
         "@bufbuild/protobuf": "^2.12.0",
@@ -224,6 +224,8 @@
 
     "@scrapest/core": ["@scrapest/core@workspace:packages/core"],
 
+    "@scrapest/fcm": ["@scrapest/fcm@workspace:apps/fcm"],
+
     "@scrapest/tcp-rpc": ["@scrapest/tcp-rpc@workspace:packages/tcp-rpc"],
 
     "@scrapest/web-push": ["@scrapest/web-push@workspace:apps/web_push"],
@@ -343,8 +345,6 @@
     "caseless": ["caseless@0.12.0", "", {}, "sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw=="],
 
     "chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
-
-    "chrome-fcm-ts": ["chrome-fcm-ts@workspace:apps/fcm"],
 
     "cjs-module-lexer": ["cjs-module-lexer@2.2.0", "", {}, "sha512-4bHTS2YuzUvtoLjdy+98ykbNB5jS0+07EvFNXerqZQJ89F7DI6ET7OQo/HJuW6K0aVsKA9hj9/RVb2kQVOrPDQ=="],
 

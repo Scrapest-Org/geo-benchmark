@@ -9,7 +9,7 @@ tcpRpcServer.on("dispatch-events", async (data: unknown) => {
   try {
     if (!payload || !payload.length) throw new Error("No payload provided");
 
-    await internal.handleDispatch(payload);
+    // await internal.handleDispatch(payload);
   } catch (error) {
     const e = error instanceof Error ? error : new Error(String(error));
     console.error(`Failed to dispatch events: ${e.message}`);
