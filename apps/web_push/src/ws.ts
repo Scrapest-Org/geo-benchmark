@@ -271,7 +271,6 @@ class WS {
         base64_to_buffer(base64url_to_base64(parsedData.data)),
       );
 
-      console.time("decrypt");
       const text = new TextDecoder().decode(decryptedData);
       const tweetData: XPostData = JSON.parse(text);
       if (!tweetData.tag) {
@@ -307,10 +306,11 @@ class WS {
         lang: tweetData.lang,
       };
 
-      console.log(`Broadcast ${tag} time`);
       const fast = new SourceEvent("fast-x", tweet, vm, sft);
+      console.log(`Broadcast ${tag} time`);
       appClient.emit("dispatch-events", { payload: [fast], app: "webpush" });
-      console.timeEnd("decrypt");
+      console.log(`Internal ${tag} time`);
+
       internalEmitter.emit("new-tweet", { tag, rcv: sft });
     } catch (error) {
       const e = error instanceof Error ? error : new Error(String(error));

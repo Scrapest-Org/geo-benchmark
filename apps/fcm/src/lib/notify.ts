@@ -47,8 +47,9 @@ export async function handleNotification(decrypted: Buffer) {
     };
 
     const tweetEvent = new SourceEvent("fast-x", tweet, vm, sft);
-    console.log(`Broadcast ${tag} time`);
+    console.log(`Fast ${tag} time`);
     tcpRpcClient.emit("dispatch-events", { payload: [tweetEvent], app: "fcm" });
+    console.log(`Internal ${tag} time`);
     internalEmitter.emit("new-tweet", { tag, rcv: sft });
   } catch (error) {
     const e = error instanceof Error ? error : new Error(String(error));
