@@ -24,8 +24,14 @@ import "@scrapest/core/utils/console";
 
 const vm = getEnv("VM_NAME");
 const apm = new AccountPoolManager();
+let running = false;
 
 export async function runWithAccount() {
+  if (running) {
+    console.warn("runWithAccount already in progress, skipping duplicate call");
+    return;
+  }
+  running = true;
   const account = await apm.getAccount({ claimKey: vm });
   const cookies = { ct0: account.CT0, authToken: account.AUTH_TOKEN };
 
@@ -107,6 +113,7 @@ export async function runWithAccount() {
   }
 
   const subscriber = buildSubscriber(state);
+  running = false;
   await receiveForever(state, subscriber);
 }
 
