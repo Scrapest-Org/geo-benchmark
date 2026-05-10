@@ -1,0 +1,174 @@
+// Minimal subset of Chromium's MCS (Mobile Connection Server) protobuf
+// definitions. MCS is the persistent, framed protobuf protocol Chrome uses to
+// receive FCM data messages over a TLS connection to mtalk.google.com:5228.
+//
+// Source reference: google_apis/gcm/protocol/mcs.proto (Chromium).
+//
+// On-the-wire framing is NOT part of these protos — see src/mcs/frame.rs:
+//   first frame from client:  [version: u8 = 41] [tag: u8] [varint len] [proto]
+//   every other frame:                          [tag: u8] [varint len] [proto]
+syntax = "proto2";
+
+package mcs_proto;
+
+// ---- Common helpers -------------------------------------------------------
+
+message HeartbeatStat {
+  required string ip = 1;
+  required bool timeout = 2;
+  required int32 interval_ms = 3;
+}
+
+message HeartbeatConfig {
+  optional bool upload_stat = 1;
+  optional string ip = 2;
+  optional int32 interval_ms = 3;
+}
+
+message ErrorInfo {
+  required int32 code = 1;
+  optional string message = 2;
+  optional string type = 3;
+  optional Extension extension = 4;
+}
+
+message Setting {
+  optional string name = 1;
+  optional string value = 2;
+}
+
+message Extension {
+  optional int32 id = 1;
+  optional bytes data = 2;
+}
+
+message ClientEvent {
+  enum Type {
+    UNKNOWN = 0;
+    DISCARDED_EVENTS = 1;
+    FAILED_CONNECTION = 2;
+    SUCCESSFUL_CONNECTION = 3;
+  }
+  optional Type type = 1;
+  optional uint32 number_discarded_events = 100;
+  optional int32 network_type = 200;
+  optional int64 time_connection_started_ms = 202;
+  optional int64 time_connection_ended_ms = 203;
+  optional int32 error_code = 204;
+  optional int64 time_connection_established_ms = 300;
+}
+
+// ---- Message tag 0 / 1 ---------------------------------------------------
+
+message HeartbeatPing {
+  optional int32 stream_id = 1;
+  optional int32 last_stream_id_received = 2;
+  optional int64 status = 3;
+}
+
+message HeartbeatAck {
+  optional int32 stream_id = 1;
+  optional int32 last_stream_id_received = 2;
+  optional int64 status = 3;
+}
+
+// ---- Message tag 2 (LoginRequest) -----------------------------------------
+
+message LoginRequest {
+  enum AuthService {
+    ANDROID_ID = 2;
+  }
+  optional string id = 1;
+  optional string domain = 2;
+  optional string user = 3;
+  optional string resource = 4;
+  optional string auth_token = 5;
+  optional string device_id = 6;
+  optional int64 last_rmq_id = 7;
+  repeated Setting setting = 8;
+  optional int32 compress = 9;
+  repeated string received_persistent_id = 10;
+  optional bool adaptive_heartbeat = 12;
+  optional HeartbeatStat heartbeat_stat = 13;
+  optional bool use_rmq2 = 14;
+  optional int64 account_id = 15;
+  optional AuthService auth_service = 16;
+  optional int32 network_type = 17;
+  optional int64 status = 18;
+  repeated ClientEvent client_event = 22;
+}
+
+// ---- Message tag 3 (LoginResponse) ---------------------------------------
+
+message LoginResponse {
+  optional string id = 1;
+  optional string jid = 2;
+  optional ErrorInfo error = 3;
+  repeated Setting setting = 4;
+  optional int32 stream_id = 5;
+  optional int32 last_stream_id_received = 6;
+  optional HeartbeatConfig heartbeat_config = 7;
+  optional int64 server_timestamp = 8;
+}
+
+// ---- Message tag 4 -------------------------------------------------------
+
+message Close {}
+
+// ---- Message tag 7 (IqStanza, used for selective ack) --------------------
+
+message IqStanza {
+  enum IqType {
+    GET = 0;
+    SET = 1;
+    RESULT = 2;
+    ERROR = 3;
+  }
+  optional int64 rmq_id = 1;
+  optional IqType type = 2;
+  optional string id = 3;
+  optional string from = 4;
+  optional string to = 5;
+  optional ErrorInfo error = 6;
+  optional Extension extension = 7;
+  optional string persistent_id = 8;
+  optional int32 stream_id = 9;
+  optional int32 last_stream_id_received = 10;
+  optional string account_id = 11;
+  optional int64 status = 12;
+}
+
+// SelectiveAck carries the persistent_ids of messages we have processed so
+// the server can drop them server-side. Wrapped inside IqStanza.extension
+// with id = 12 (kSelectiveAck).
+message SelectiveAck {
+  repeated string id = 1;
+}
+
+// StreamAck has no payload; wrapped inside IqStanza.extension with id = 13.
+message StreamAck {}
+
+// ---- Message tag 8 (DataMessageStanza) -----------------------------------
+
+message AppData {
+  optional string key = 1;
+  optional string value = 2;
+}
+
+// Modern Chromium FCM `DataMessageStanza` schema. The field numbers below
+// were derived from observing actual Twitter pushes — they have shifted
+// from the legacy mcs.proto numbering most open-source FCM receivers use.
+message DataMessageStanza {
+  optional string id            = 2;   // short hex/random id
+  optional string from          = 3;   // sender app id (the VAPID public key)
+  optional string category      = 5;   // "org.chromium.linux"
+  repeated AppData app_data     = 7;   // headers: encryption, crypto-key, content-encoding, subtype, ...
+  optional string persistent_id = 9;   // ack id ("0:<msec>%<hex>")
+  optional int32  ttl           = 17;
+  optional int64  sent          = 18;  // ms since epoch
+  optional bytes  raw_data      = 21;  // encrypted body
+  // The remaining fields are observed but not (currently) used.
+  optional int32  meta_29       = 29;
+  optional int64  meta_30       = 30;
+  optional int32  meta_31       = 31;
+}

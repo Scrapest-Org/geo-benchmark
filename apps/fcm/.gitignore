@@ -1,0 +1,6 @@
+node_modules
+gen
+.DS_Store
+accounts.toml
+state.json
+state.json.tmp

@@ -41,3 +41,6 @@ scripts/*.txt
 
 # Python
 venv
+
+# Rust
+accounts.toml
