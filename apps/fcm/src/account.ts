@@ -31,89 +31,93 @@ export async function runWithAccount() {
     console.warn("runWithAccount already in progress, skipping duplicate call");
     return;
   }
-  running = true;
+
   const account = await apm.getAccount({ claimKey: vm });
   const cookies = { ct0: account.CT0, authToken: account.AUTH_TOKEN };
-
   let state = await loadFcmState(vm);
 
-  if (!state) {
-    console.info("no existing FCM credentials — running checkin + register", {
-      vm,
-    });
+  try {
+    if (!state) {
+      console.info("no existing FCM credentials — running checkin + register", {
+        vm,
+      });
 
-    const cred = await checkin(CHECKIN_URL);
-    const ecdh = createECDH("prime256v1");
-    ecdh.generateKeys();
-    const ecdhPriv = ecdh.getPrivateKey();
-    const ecdhPub = ecdh.getPublicKey();
-    const authSecret = randomBytes(16);
-    const subtype = `wp:${randomUUID()}`;
+      const cred = await checkin(CHECKIN_URL);
+      const ecdh = createECDH("prime256v1");
+      ecdh.generateKeys();
+      const ecdhPriv = ecdh.getPrivateKey();
+      const ecdhPub = ecdh.getPublicKey();
+      const authSecret = randomBytes(16);
+      const subtype = `wp:${randomUUID()}`;
 
-    const fcmToken = await register(
-      REGISTER_URL,
-      cred.androidId,
-      cred.securityToken,
-      subtype,
-      TWITTER_VAPID_PUBLIC_KEY,
-    );
+      const fcmToken = await register(
+        REGISTER_URL,
+        cred.androidId,
+        cred.securityToken,
+        subtype,
+        TWITTER_VAPID_PUBLIC_KEY,
+      );
 
-    const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${fcmToken}`;
-    const ecdhPubB64 = ecdhPub.toString("base64url");
-    const authSecretB64 = authSecret.toString("base64url");
+      const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${fcmToken}`;
+      const ecdhPubB64 = ecdhPub.toString("base64url");
+      const authSecretB64 = authSecret.toString("base64url");
 
-    try {
-      const respText = await subscribe(
+      try {
+        const respText = await subscribe(
+          SUBSCRIBE_URL,
+          fcmEndpoint,
+          ecdhPubB64,
+          authSecretB64,
+          cookies,
+          "en",
+        );
+        console.info("twitter login.json response", {
+          status: 200,
+          len: respText.length,
+        });
+      } catch (err) {
+        if (err instanceof TwitterAuthError) {
+          throw new Error(
+            `twitter auth failed (HTTP ${err.status}): ${err.body}`,
+          );
+        }
+        throw err;
+      }
+
+      state = {
+        android_id: cred.androidId.toString(),
+        security_token: cred.securityToken.toString(),
+        fcm_token: fcmToken,
+        ecdh_private_b64: ecdhPriv.toString("base64url"),
+        ecdh_public_b64: ecdhPubB64,
+        auth_secret_b64: authSecretB64,
+        subtype_uuid: subtype,
+        twitter_subscribed: true,
+        received_persistent_ids: [],
+      };
+      await saveFcmState(vm, state);
+      console.info("bootstrap complete", { vm });
+    } else if (!state.twitter_subscribed) {
+      const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${state.fcm_token}`;
+      await subscribe(
         SUBSCRIBE_URL,
         fcmEndpoint,
-        ecdhPubB64,
-        authSecretB64,
+        state.ecdh_public_b64,
+        state.auth_secret_b64,
         cookies,
         "en",
       );
-      console.info("twitter login.json response", {
-        status: 200,
-        len: respText.length,
-      });
-    } catch (err) {
-      if (err instanceof TwitterAuthError) {
-        throw new Error(
-          `twitter auth failed (HTTP ${err.status}): ${err.body}`,
-        );
-      }
-      throw err;
+      state.twitter_subscribed = true;
+      await saveFcmState(vm, state);
+      console.info("twitter subscription refreshed", { vm });
     }
-
-    state = {
-      android_id: cred.androidId.toString(),
-      security_token: cred.securityToken.toString(),
-      fcm_token: fcmToken,
-      ecdh_private_b64: ecdhPriv.toString("base64url"),
-      ecdh_public_b64: ecdhPubB64,
-      auth_secret_b64: authSecretB64,
-      subtype_uuid: subtype,
-      twitter_subscribed: true,
-      received_persistent_ids: [],
-    };
-    await saveFcmState(vm, state);
-    console.info("bootstrap complete", { vm });
-  } else if (!state.twitter_subscribed) {
-    const fcmEndpoint = `https://fcm.googleapis.com/fcm/send/${state.fcm_token}`;
-    await subscribe(
-      SUBSCRIBE_URL,
-      fcmEndpoint,
-      state.ecdh_public_b64,
-      state.auth_secret_b64,
-      cookies,
-      "en",
-    );
-    state.twitter_subscribed = true;
-    await saveFcmState(vm, state);
-    console.info("twitter subscription refreshed", { vm });
+  } catch (error) {
+    throw error;
+  } finally {
+    running = false;
   }
 
   const subscriber = buildSubscriber(state);
-  running = false;
   await receiveForever(state, subscriber);
 }
 

@@ -11,6 +11,7 @@
   "scripts": {
     "push": "bun --env-file=.env --filter @scrapest/web-push start",
     "app": "bun --env-file=.env --filter @scrapest/app dev",
+    "fcm": "bun --env-file=.env --filter @scrapest/fcm start",
     "all": "concurrently \"bun run push\" \"bun run app\"",
     "test": "bun test",
     "format": "bun x prettier --write .",
