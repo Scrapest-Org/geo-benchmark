@@ -11,6 +11,8 @@ export async function handleNotification(decrypted: Buffer) {
   try {
     console.time("decrypt");
     const text = new TextDecoder().decode(decrypted);
+    //     parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(decrypted));
+
     const tweetData: XPostData = JSON.parse(text);
     if (!tweetData.tag) {
       console.info("Skipping non-tweet notification...", text);
@@ -50,11 +52,8 @@ export async function handleNotification(decrypted: Buffer) {
     tcpRpcClient.emit("dispatch-events", { payload: [tweetEvent] });
     console.timeEnd("decrypt");
     internalEmitter.emit("new-tweet", { tag, rcv: sft });
-
-    return tweetData;
   } catch (error) {
     const e = error instanceof Error ? error : new Error(String(error));
     console.error("[fcm] Error processing notification:", e.message);
-    return null;
   }
 }

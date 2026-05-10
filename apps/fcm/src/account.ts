@@ -122,7 +122,7 @@ async function receiveForever(
       backoffMs = 1000;
     } catch (err) {
       console.warn("MCS session error", { vm, error: String(err) });
-      await sleep(backoffMs);
+      await Bun.sleep(backoffMs);
       backoffMs = Math.min(backoffMs * 2, 300_000);
     }
   }
@@ -159,6 +159,7 @@ async function runOneSession(
       if (!encoding || encoding === "aes128gcm") {
         plain = decryptAes128gcm(msg.rawData, subscriber);
       } else if (encoding === "aesgcm") {
+        // plain = decryptLegacyAesgcm(msg.rawData, msg.headers, subscriber);
         const enc = msg.headers["encryption"] ?? "";
         const ck = msg.headers["crypto-key"] ?? "";
         const saltB64 = parseNamedParam(enc, "salt");
@@ -246,8 +247,4 @@ async function openTls(hostPort: string): Promise<import("node:net").Socket> {
     sock.once("secureConnect", onConnect);
     sock.once("error", onError);
   });
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }
