@@ -4,8 +4,7 @@ import { InternalService } from "../services/internal";
 const internal = new InternalService();
 
 tcpRpcServer.on("dispatch-events", async (data: unknown) => {
-  const { payload, app } = data as { payload: any; app: string };
-  console.log(app, Date.now());
+  const { payload } = data as { payload: any };
   try {
     if (!payload || !payload.length) throw new Error("No payload provided");
 

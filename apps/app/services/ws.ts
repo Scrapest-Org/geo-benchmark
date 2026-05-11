@@ -1,12 +1,8 @@
-import { redis } from "@scrapest/config";
-import { KEYS } from "@scrapest/constants";
 import type SourceEvent from "@scrapest/core/resolvers";
 import type { WebSocket } from "ws";
 
 export const SSE_PUBLIC_AUTH = "PUBLIC_FEED";
 export const SSE_TOKEN_KEY = (token: string) => `sse:token:${token}`;
-
-const SSE_BUFFER_SIZE = 5;
 
 const isFullXPayload = (source: SourceEvent["source"]) => source === "x";
 
@@ -62,7 +58,7 @@ export class SocketRegistry {
         if (isFullX && socket.data.ignoreFullPayload) continue;
 
         socket.send(message);
-        console.log(`Broadcasted tag ${payload.mid} time`);
+        console.log(`Broadcast ${payload.mid} time`);
       }
     }
   }
@@ -89,7 +85,7 @@ export class SocketRegistry {
           ws.ping();
         }
         if (timeSinceLastSeen > deadTimeout) {
-          console.log(`🧹 | Pruning dead connection for: ${auth}`);
+          console.log(`🧹 | Pruning dead connection for: ${auth}:${ws}`);
           ws.terminate();
           this.remove(ws);
         }

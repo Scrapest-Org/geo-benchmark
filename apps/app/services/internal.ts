@@ -15,10 +15,12 @@ export class InternalService {
     const apikeys = ApiKeyCache.get(rk);
 
     if (!apikeys?.size) return;
-    SocketRegistry.broadcast([...apikeys], data);
-    SSERegistry.broadcast([...apikeys, SSE_PUBLIC_AUTH], data);
+    const keys = [...apikeys];
 
-    const wh_keys = [...apikeys].map((key) => `${KEYS.WEBHOOK}:${key}`);
+    SocketRegistry.broadcast(keys, data);
+    SSERegistry.broadcast([...keys, SSE_PUBLIC_AUTH], data);
+
+    const wh_keys = keys.map((key) => `${KEYS.WEBHOOK}:${key}`);
     const webhooks = await redis.mget(...wh_keys);
 
     return webhooks.map((url) =>
@@ -77,7 +79,6 @@ export class InternalService {
 
   public async handleDispatch(events: SourceEvent[]) {
     const receivedAt = Date.now();
-
     const nestedWebhookTasks = await Promise.all(
       events.map((event) => this.broadcast(event)),
     );
