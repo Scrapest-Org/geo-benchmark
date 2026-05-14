@@ -11,7 +11,7 @@ import { TIME } from "@scrapest/constants";
 const gtm = new GuestTokenManager();
 const gql = new XGraphQL(gtm);
 
-const pool = new AccountPoolManager("conveyor3");
+const pool = new AccountPoolManager(getEnv("CONVEYOR"));
 const vmName = getEnv("VM_NAME");
 const xRef = { current: null as X | null };
 

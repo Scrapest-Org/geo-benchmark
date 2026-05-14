@@ -23,7 +23,7 @@ import {
 import "@scrapest/core/utils/console";
 
 const vm = getEnv("VM_NAME");
-const apm = new AccountPoolManager();
+const apm = new AccountPoolManager(getEnv("CONVEYOR"));
 let running = false;
 
 export async function runWithAccount() {
