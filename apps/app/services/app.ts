@@ -16,7 +16,7 @@ export class AppService {
   }
 
   stop() {
-    this.gtm.stop();
+    if (this.gtm) this.gtm.stop();
   }
 
   async initialize() {

@@ -46,6 +46,8 @@ class AccountPoolManager {
 
     if (!login) {
       const poolSize = await redis.llen(this.conveyorKey);
+      console.log(poolSize, "pool size of ", this.conveyorKey);
+
       let attempts = 0;
 
       while (attempts < poolSize) {
